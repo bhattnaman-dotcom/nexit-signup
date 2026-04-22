@@ -2,7 +2,7 @@ export const TC_SECTIONS = [
   {
     number: 1,
     title: 'Services and Scope',
-    content: `NexIT Solutions (ABN [ABN]) ("NexIT", "we", "us") agrees to provide the digital marketing services selected in the Service Agreement ("Services") to the client identified therein ("Client"). The scope of Services is limited to what is described in the Agreement. Any additional services requested by the Client that fall outside the agreed scope will require a separate written agreement and may incur additional fees. NexIT reserves the right to use subcontractors or third-party service providers to fulfil any part of the Services, provided that NexIT remains responsible to the Client for the quality and delivery of those Services. Services commence upon receipt of the signed Agreement and, where applicable, the first payment.`,
+    content: `NexIT Solutions (ABN [92401198599]) ("NexIT", "we", "us") agrees to provide the digital marketing services selected in the Service Agreement ("Services") to the client identified therein ("Client"). The scope of Services is limited to what is described in the Agreement. Any additional services requested by the Client that fall outside the agreed scope will require a separate written agreement and may incur additional fees. NexIT reserves the right to use subcontractors or third-party service providers to fulfil any part of the Services, provided that NexIT remains responsible to the Client for the quality and delivery of those Services. Services commence upon receipt of the signed Agreement and, where applicable, the first payment.`,
   },
   {
     number: 2,
