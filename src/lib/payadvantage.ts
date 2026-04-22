@@ -2,6 +2,7 @@ import type { Agreement } from '@/types';
 
 interface PATokenResponse {
   access_token: string;
+  refresh_token?: string;
   token_type: string;
   expires_in: number;
 }
@@ -15,24 +16,34 @@ async function getBearerToken(): Promise<string> {
   const base = process.env.PAY_ADVANTAGE_BASE_URL!;
   const clientId = process.env.PAY_ADVANTAGE_CLIENT_ID!;
   const clientSecret = process.env.PAY_ADVANTAGE_CLIENT_SECRET!;
+  const refreshToken = process.env.PAY_ADVANTAGE_REFRESH_TOKEN;
   const tokenUrl = `${base}/token`;
 
-  // Standard OAuth2: credentials in Basic Auth header, grant_type in body
+  if (!refreshToken) {
+    throw new Error(
+      'PAY_ADVANTAGE_REFRESH_TOKEN is not set. ' +
+      'Visit /api/auth/payadvantage/authorize (while logged into admin) to complete the one-time Pay Advantage authorization.'
+    );
+  }
+
   const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
 
   const res = await fetch(tokenUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': `Basic ${credentials}`,
+      Authorization: `Basic ${credentials}`,
     },
-    body: new URLSearchParams({ grant_type: 'client_credentials' }),
+    body: new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+    }),
   });
 
   if (!res.ok) {
     let detail = '';
     try { detail = ` — ${await res.text()}`; } catch { /* ignore */ }
-    throw new Error(`Pay Advantage token error: ${res.status}${detail} (url: ${tokenUrl})`);
+    throw new Error(`Pay Advantage token refresh error: ${res.status}${detail}`);
   }
 
   const data: PATokenResponse = await res.json();

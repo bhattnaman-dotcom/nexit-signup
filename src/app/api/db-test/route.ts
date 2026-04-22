@@ -22,7 +22,8 @@ export async function GET() {
     const paConfigured =
       !!process.env.PAY_ADVANTAGE_CLIENT_ID &&
       !!process.env.PAY_ADVANTAGE_CLIENT_SECRET &&
-      !!process.env.PAY_ADVANTAGE_BASE_URL;
+      !!process.env.PAY_ADVANTAGE_BASE_URL &&
+      !!process.env.PAY_ADVANTAGE_REFRESH_TOKEN;
 
     return NextResponse.json({
       db_connected: true,
@@ -33,6 +34,7 @@ export async function GET() {
       pay_advantage_base_url: process.env.PAY_ADVANTAGE_BASE_URL ?? '(not set)',
       pay_advantage_client_id_set: !!process.env.PAY_ADVANTAGE_CLIENT_ID,
       pay_advantage_client_secret_set: !!process.env.PAY_ADVANTAGE_CLIENT_SECRET,
+      pay_advantage_refresh_token_set: !!process.env.PAY_ADVANTAGE_REFRESH_TOKEN,
       gmail_configured: !!process.env.GMAIL_USER && !!process.env.GMAIL_APP_PASSWORD,
       admin_hash_set: !!process.env.ADMIN_PASSWORD_HASH,
       jwt_secret_set: !!process.env.JWT_SECRET,
