@@ -40,8 +40,27 @@ export async function POST(
 
     const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
 
+    // Check Pay Advantage credentials are configured
+    if (!process.env.PAY_ADVANTAGE_CLIENT_ID || !process.env.PAY_ADVANTAGE_CLIENT_SECRET) {
+      return NextResponse.json(
+        { error: 'Payment gateway not configured. Please set PAY_ADVANTAGE_CLIENT_ID and PAY_ADVANTAGE_CLIENT_SECRET in Vercel environment variables.' },
+        { status: 503 }
+      );
+    }
+
     // Create Pay Advantage customer
-    const { customerId, iframeUrl } = await createPayAdvantageCustomer(agreement);
+    let customerId: string;
+    let iframeUrl: string;
+    try {
+      ({ customerId, iframeUrl } = await createPayAdvantageCustomer(agreement));
+    } catch (paErr) {
+      const msg = paErr instanceof Error ? paErr.message : String(paErr);
+      console.error('Pay Advantage error:', msg);
+      return NextResponse.json(
+        { error: `Payment gateway error: ${msg}` },
+        { status: 502 }
+      );
+    }
 
     // Save signature and update status
     await pool.execute(
@@ -54,7 +73,8 @@ export async function POST(
 
     return NextResponse.json({ iframeUrl });
   } catch (err) {
-    console.error('POST /api/agreements/[id]/sign error:', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('POST /api/agreements/[id]/sign error:', msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
