@@ -1,0 +1,361 @@
+import React from 'react';
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  Image,
+  StyleSheet,
+  Font,
+} from '@react-pdf/renderer';
+import type { Agreement } from '@/types';
+import { TC_SECTIONS } from './tc';
+
+Font.register({
+  family: 'Helvetica',
+  fonts: [],
+});
+
+const orange = '#F47B20';
+const navy = '#2C3275';
+const dark = '#1A1D36';
+const lightGrey = '#f5f5f5';
+const midGrey = '#666666';
+
+const styles = StyleSheet.create({
+  page: {
+    fontFamily: 'Helvetica',
+    fontSize: 9,
+    color: '#333333',
+    paddingTop: 0,
+    paddingBottom: 48,
+  },
+  header: {
+    backgroundColor: navy,
+    paddingHorizontal: 40,
+    paddingVertical: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  headerTitle: {
+    color: orange,
+    fontSize: 18,
+    fontFamily: 'Helvetica-Bold',
+    letterSpacing: 1,
+  },
+  headerSub: {
+    color: '#a0a8d0',
+    fontSize: 9,
+    marginTop: 2,
+  },
+  headerBadge: {
+    backgroundColor: orange,
+    color: '#ffffff',
+    fontSize: 9,
+    fontFamily: 'Helvetica-Bold',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  body: {
+    paddingHorizontal: 40,
+    paddingTop: 24,
+  },
+  sectionTitle: {
+    fontSize: 11,
+    fontFamily: 'Helvetica-Bold',
+    color: navy,
+    marginBottom: 10,
+    paddingBottom: 4,
+    borderBottomWidth: 2,
+    borderBottomColor: orange,
+  },
+  card: {
+    backgroundColor: lightGrey,
+    borderRadius: 4,
+    padding: 16,
+    marginBottom: 16,
+  },
+  row: {
+    flexDirection: 'row',
+    marginBottom: 6,
+  },
+  label: {
+    width: 120,
+    fontSize: 8,
+    color: midGrey,
+    fontFamily: 'Helvetica-Bold',
+  },
+  value: {
+    flex: 1,
+    fontSize: 9,
+    color: dark,
+  },
+  agreementId: {
+    fontSize: 8,
+    color: midGrey,
+    marginBottom: 16,
+  },
+  pill: {
+    backgroundColor: '#e8eaf6',
+    color: navy,
+    fontSize: 8,
+    fontFamily: 'Helvetica-Bold',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    marginRight: 4,
+  },
+  pillsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 2,
+  },
+  price: {
+    fontSize: 14,
+    fontFamily: 'Helvetica-Bold',
+    color: dark,
+  },
+  billingBadge: {
+    fontSize: 8,
+    color: '#ffffff',
+    fontFamily: 'Helvetica-Bold',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  tcSection: {
+    marginBottom: 10,
+  },
+  tcSectionTitle: {
+    fontSize: 9,
+    fontFamily: 'Helvetica-Bold',
+    color: navy,
+    marginBottom: 3,
+  },
+  tcText: {
+    fontSize: 7.5,
+    color: '#444444',
+    lineHeight: 1.5,
+  },
+  sigBlock: {
+    backgroundColor: lightGrey,
+    borderRadius: 4,
+    padding: 16,
+    marginBottom: 16,
+  },
+  sigImage: {
+    width: 200,
+    height: 70,
+    objectFit: 'contain',
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#dddddd',
+    borderRadius: 4,
+    marginBottom: 8,
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 24,
+    left: 40,
+    right: 40,
+    borderTopWidth: 1,
+    borderTopColor: '#dddddd',
+    paddingTop: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  footerText: {
+    fontSize: 7,
+    color: midGrey,
+  },
+  pageBreak: {
+    marginTop: 20,
+  },
+  divider: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#eeeeee',
+    marginBottom: 16,
+  },
+});
+
+function formatPrice(price: number): string {
+  return new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(price);
+}
+
+function formatDate(iso: string | null): string {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString('en-AU', { timeZone: 'Australia/Melbourne' });
+}
+
+interface AgreementPDFProps {
+  agreement: Agreement;
+}
+
+export function AgreementPDF({ agreement }: AgreementPDFProps) {
+  const preparedDate = new Date(agreement.prepared_date).toLocaleDateString('en-AU');
+
+  return (
+    <Document
+      title={`NexIT Solutions — Service Agreement — ${agreement.business_name}`}
+      author="NexIT Solutions"
+      subject="Service Agreement"
+    >
+      {/* Page 1: Details */}
+      <Page size="A4" style={styles.page}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.headerTitle}>NexIT Solutions</Text>
+            <Text style={styles.headerSub}>Melbourne's Digital Growth Partner</Text>
+          </View>
+          <Text style={styles.headerBadge}>SERVICE AGREEMENT</Text>
+        </View>
+
+        <View style={styles.body}>
+          <Text style={styles.agreementId}>Agreement ID: {agreement.id}</Text>
+
+          {/* Prepared By */}
+          <Text style={styles.sectionTitle}>Prepared By</Text>
+          <View style={styles.card}>
+            <View style={styles.row}>
+              <Text style={styles.label}>Staff Member:</Text>
+              <Text style={styles.value}>{agreement.staff_name}</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Staff Email:</Text>
+              <Text style={styles.value}>{agreement.staff_email}</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Prepared Date:</Text>
+              <Text style={styles.value}>{preparedDate}</Text>
+            </View>
+          </View>
+
+          {/* Client Details */}
+          <Text style={styles.sectionTitle}>Client Details</Text>
+          <View style={styles.card}>
+            <View style={styles.row}>
+              <Text style={styles.label}>Business Name:</Text>
+              <Text style={styles.value}>{agreement.business_name}</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Contact Name:</Text>
+              <Text style={styles.value}>{agreement.customer_name}</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Email:</Text>
+              <Text style={styles.value}>{agreement.customer_email}</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Phone:</Text>
+              <Text style={styles.value}>{agreement.customer_phone}</Text>
+            </View>
+          </View>
+
+          {/* Services & Pricing */}
+          <Text style={styles.sectionTitle}>Services & Pricing</Text>
+          <View style={styles.card}>
+            <View style={styles.row}>
+              <Text style={styles.label}>Services:</Text>
+              <View style={[styles.pillsRow, { flex: 1 }]}>
+                {agreement.products.map((p) => (
+                  <Text key={p} style={styles.pill}>{p}</Text>
+                ))}
+              </View>
+            </View>
+            <View style={[styles.row, { marginTop: 8 }]}>
+              <Text style={styles.label}>Investment:</Text>
+              <Text style={[styles.value, { fontFamily: 'Helvetica-Bold', fontSize: 12 }]}>
+                {formatPrice(agreement.price)} AUD (incl. GST)
+              </Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Billing Type:</Text>
+              <Text
+                style={[
+                  styles.billingBadge,
+                  { backgroundColor: agreement.billing_type === 'recurring' ? navy : orange },
+                ]}
+              >
+                {agreement.billing_type === 'recurring' ? 'Recurring Monthly' : 'Once-off Payment'}
+              </Text>
+            </View>
+          </View>
+
+          {/* Signature */}
+          {agreement.signature_data && (
+            <>
+              <Text style={styles.sectionTitle}>Client Signature</Text>
+              <View style={styles.sigBlock}>
+                <Image src={agreement.signature_data} style={styles.sigImage} />
+                <View style={styles.row}>
+                  <Text style={styles.label}>Signed By:</Text>
+                  <Text style={styles.value}>{agreement.customer_name}</Text>
+                </View>
+                <View style={styles.row}>
+                  <Text style={styles.label}>On Behalf Of:</Text>
+                  <Text style={styles.value}>{agreement.business_name}</Text>
+                </View>
+                <View style={styles.row}>
+                  <Text style={styles.label}>Signed At:</Text>
+                  <Text style={styles.value}>{formatDate(agreement.signed_at)}</Text>
+                </View>
+                {agreement.paid_at && (
+                  <View style={styles.row}>
+                    <Text style={styles.label}>Payment Confirmed:</Text>
+                    <Text style={styles.value}>{formatDate(agreement.paid_at)}</Text>
+                  </View>
+                )}
+              </View>
+            </>
+          )}
+        </View>
+
+        {/* Footer */}
+        <View style={styles.footer} fixed>
+          <Text style={styles.footerText}>NexIT Solutions (ABN [ABN]) · Melbourne, VIC</Text>
+          <Text style={styles.footerText}>hello@nexit.com.au · nexit.com.au</Text>
+        </View>
+      </Page>
+
+      {/* Page 2+: Terms & Conditions */}
+      <Page size="A4" style={styles.page}>
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.headerTitle}>NexIT Solutions</Text>
+            <Text style={styles.headerSub}>Melbourne's Digital Growth Partner</Text>
+          </View>
+          <Text style={styles.headerBadge}>TERMS & CONDITIONS</Text>
+        </View>
+
+        <View style={styles.body}>
+          <Text style={[styles.sectionTitle, { marginBottom: 16 }]}>
+            Terms and Conditions of Service
+          </Text>
+          <Text style={[styles.tcText, { marginBottom: 16, color: midGrey }]}>
+            These Terms and Conditions govern the provision of digital marketing services by NexIT
+            Solutions (ABN [ABN]) to the Client identified in the Service Agreement. By signing the
+            Service Agreement, the Client agrees to be bound by these Terms and Conditions. Governing
+            law: Victoria, Australia.
+          </Text>
+
+          {TC_SECTIONS.map((section) => (
+            <View key={section.number} style={styles.tcSection} wrap={false}>
+              <Text style={styles.tcSectionTitle}>
+                {section.number}. {section.title}
+              </Text>
+              <Text style={styles.tcText}>{section.content}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.footer} fixed>
+          <Text style={styles.footerText}>NexIT Solutions (ABN [ABN]) · Melbourne, VIC</Text>
+          <Text style={styles.footerText}>hello@nexit.com.au · nexit.com.au</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+}
