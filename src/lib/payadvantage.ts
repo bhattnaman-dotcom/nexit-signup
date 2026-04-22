@@ -11,20 +11,39 @@ interface PACustomerResponse {
   iframeUrl?: string;
 }
 
-async function getBearerToken(): Promise<string> {
+// The OAuth token endpoint is at the root, not under /v3
+function getTokenUrl(): string {
   const base = process.env.PAY_ADVANTAGE_BASE_URL!;
-  const res = await fetch(`${base}/token`, {
+  // Strip /v3 or any version suffix to get the root URL
+  const root = base.replace(/\/v\d+\/?$/, '');
+  return `${root}/token`;
+}
+
+async function getBearerToken(): Promise<string> {
+  const tokenUrl = getTokenUrl();
+  const base = process.env.PAY_ADVANTAGE_BASE_URL!;
+
+  const body = new URLSearchParams({
+    grant_type: 'client_credentials',
+    client_id: process.env.PAY_ADVANTAGE_CLIENT_ID!,
+    client_secret: process.env.PAY_ADVANTAGE_CLIENT_SECRET!,
+  });
+
+  const res = await fetch(tokenUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      grant_type: 'client_credentials',
-      client_id: process.env.PAY_ADVANTAGE_CLIENT_ID!,
-      client_secret: process.env.PAY_ADVANTAGE_CLIENT_SECRET!,
-    }),
+    body,
   });
 
   if (!res.ok) {
-    throw new Error(`Pay Advantage token error: ${res.status}`);
+    let detail = '';
+    try {
+      const errBody = await res.text();
+      detail = ` — ${errBody}`;
+    } catch { /* ignore */ }
+    throw new Error(
+      `Pay Advantage token error: ${res.status}${detail} (url: ${tokenUrl}, base: ${base})`
+    );
   }
 
   const data: PATokenResponse = await res.json();
@@ -57,7 +76,12 @@ export async function createPayAdvantageCustomer(
   });
 
   if (!res.ok) {
-    throw new Error(`Pay Advantage customer creation error: ${res.status}`);
+    let detail = '';
+    try {
+      const errBody = await res.text();
+      detail = ` — ${errBody}`;
+    } catch { /* ignore */ }
+    throw new Error(`Pay Advantage customer creation error: ${res.status}${detail}`);
   }
 
   const data: PACustomerResponse = await res.json();
@@ -75,6 +99,5 @@ export function verifyWebhookSignature(
   signature: string | null
 ): boolean {
   if (!signature || !process.env.PAY_ADVANTAGE_WEBHOOK_SECRET) return false;
-  const expected = process.env.PAY_ADVANTAGE_WEBHOOK_SECRET;
-  return signature === expected;
+  return signature === process.env.PAY_ADVANTAGE_WEBHOOK_SECRET;
 }
