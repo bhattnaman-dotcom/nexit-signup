@@ -11,39 +11,28 @@ interface PACustomerResponse {
   iframeUrl?: string;
 }
 
-// The OAuth token endpoint is at the root, not under /v3
-function getTokenUrl(): string {
-  const base = process.env.PAY_ADVANTAGE_BASE_URL!;
-  // Strip /v3 or any version suffix to get the root URL
-  const root = base.replace(/\/v\d+\/?$/, '');
-  return `${root}/token`;
-}
-
 async function getBearerToken(): Promise<string> {
-  const tokenUrl = getTokenUrl();
   const base = process.env.PAY_ADVANTAGE_BASE_URL!;
+  const clientId = process.env.PAY_ADVANTAGE_CLIENT_ID!;
+  const clientSecret = process.env.PAY_ADVANTAGE_CLIENT_SECRET!;
+  const tokenUrl = `${base}/token`;
 
-  const body = new URLSearchParams({
-    grant_type: 'client_credentials',
-    client_id: process.env.PAY_ADVANTAGE_CLIENT_ID!,
-    client_secret: process.env.PAY_ADVANTAGE_CLIENT_SECRET!,
-  });
+  // Standard OAuth2: credentials in Basic Auth header, grant_type in body
+  const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
 
   const res = await fetch(tokenUrl, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': `Basic ${credentials}`,
+    },
+    body: new URLSearchParams({ grant_type: 'client_credentials' }),
   });
 
   if (!res.ok) {
     let detail = '';
-    try {
-      const errBody = await res.text();
-      detail = ` — ${errBody}`;
-    } catch { /* ignore */ }
-    throw new Error(
-      `Pay Advantage token error: ${res.status}${detail} (url: ${tokenUrl}, base: ${base})`
-    );
+    try { detail = ` — ${await res.text()}`; } catch { /* ignore */ }
+    throw new Error(`Pay Advantage token error: ${res.status}${detail} (url: ${tokenUrl})`);
   }
 
   const data: PATokenResponse = await res.json();
@@ -77,10 +66,7 @@ export async function createPayAdvantageCustomer(
 
   if (!res.ok) {
     let detail = '';
-    try {
-      const errBody = await res.text();
-      detail = ` — ${errBody}`;
-    } catch { /* ignore */ }
+    try { detail = ` — ${await res.text()}`; } catch { /* ignore */ }
     throw new Error(`Pay Advantage customer creation error: ${res.status}${detail}`);
   }
 
