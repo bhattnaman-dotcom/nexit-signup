@@ -41,9 +41,9 @@ async function getBearerToken(): Promise<string> {
   return data.access_token;
 }
 
-export async function setupPayAdvantageDirectDebit(
+export async function setupPayAdvantagePayment(
   agreement: Agreement
-): Promise<{ customerId: string }> {
+): Promise<{ customerId: string; paymentUrl: string }> {
   const token = await getBearerToken();
   const base = process.env.PAY_ADVANTAGE_BASE_URL!;
 
@@ -75,39 +75,38 @@ export async function setupPayAdvantageDirectDebit(
     throw new Error(`Pay Advantage customer creation returned no ID. Response: ${JSON.stringify(customer)}`);
   }
 
-  if (agreement.billing_type === 'recurring' && agreement.billing_frequency) {
-    // Step 2: create direct debit — PA emails the client an authorisation link
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() + 1);
-    const startDateStr = startDate.toISOString().split('T')[0];
+  // Step 2: create payment page URL — client is redirected here to pay immediately
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!;
+  const returnUrl = `${baseUrl}/agreement/${agreement.id}/signed`;
 
-    const ddRes = await fetch(`${base}/direct_debits`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        Customer: { Code: customerId },
-        Description: `NexIT retainer — ${agreement.business_name}`,
-        Frequency: agreement.billing_frequency,
-        RecurringAmount: agreement.price,
-        RecurringDateStart: startDateStr,
-        ReminderDays: 1,
-        OnchargedFees: [],
-        FailureOption: 'next',
-        ExternalID: agreement.id,
-      }),
-    });
+  const iframeRes = await fetch(`${base}/payment_iframes`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      Customer: { Code: customerId },
+      Amount: agreement.price,
+      Description: `NexIT — ${agreement.business_name}`,
+      PaymentOptions: ['creditcard'],
+      ReturnUrl: returnUrl,
+    }),
+  });
 
-    if (!ddRes.ok) {
-      let detail = '';
-      try { detail = ` — ${await ddRes.text()}`; } catch { /* ignore */ }
-      throw new Error(`Pay Advantage direct debit creation error: ${ddRes.status}${detail}`);
-    }
+  if (!iframeRes.ok) {
+    let detail = '';
+    try { detail = ` — ${await iframeRes.text()}`; } catch { /* ignore */ }
+    throw new Error(`Pay Advantage payment page error: ${iframeRes.status}${detail}`);
   }
 
-  return { customerId };
+  const iframeData = await iframeRes.json();
+  const paymentUrl = iframeData.IFrameUrl ?? iframeData.iframeUrl ?? iframeData.Url ?? iframeData.url;
+  if (!paymentUrl) {
+    throw new Error(`Pay Advantage returned no payment URL. Response: ${JSON.stringify(iframeData)}`);
+  }
+
+  return { customerId, paymentUrl };
 }
 
 export function verifyWebhookSignature(

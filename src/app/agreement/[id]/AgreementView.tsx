@@ -66,7 +66,9 @@ export default function AgreementView({ agreement }: { agreement: Agreement }) {
         throw new Error(data.error ?? 'Failed to submit signature');
       }
 
-      setStage('payment');
+      const data = await res.json();
+      // Redirect to PA's hosted payment page (full-page, avoids iframe restrictions)
+      window.location.href = data.paymentUrl;
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -245,32 +247,9 @@ export default function AgreementView({ agreement }: { agreement: Agreement }) {
       )}
 
       {stage === 'payment' && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-6 flex gap-3 items-start">
-            <svg className="w-5 h-5 text-emerald-600 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-            </svg>
-            <p className="text-sm text-emerald-800">
-              <strong>Agreement signed successfully.</strong>
-            </p>
-          </div>
-
-          <div className="text-center py-8 px-4">
-            <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-7 h-7 text-nexit-navy" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-              </svg>
-            </div>
-            <h2 className="text-lg font-semibold text-nexit-navy mb-2">Check your email</h2>
-            <p className="text-sm text-gray-600 max-w-sm mx-auto">
-              Pay Advantage has sent a payment authorisation link to <strong>{agreement.customer_email}</strong>.
-              Please check your inbox and follow the link to set up your {agreement.billing_frequency ?? 'recurring'} payment of{' '}
-              <strong>{new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(agreement.price)}</strong>.
-            </p>
-            <p className="text-xs text-gray-400 mt-4">
-              Payments are securely processed by Pay Advantage.
-            </p>
-          </div>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
+          <div className="w-10 h-10 border-2 border-gray-200 border-t-nexit-orange rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-sm text-gray-500">Redirecting to secure payment…</p>
         </div>
       )}
     </main>

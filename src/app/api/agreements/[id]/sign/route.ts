@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
-import { setupPayAdvantageDirectDebit } from '@/lib/payadvantage';
+import { setupPayAdvantagePayment } from '@/lib/payadvantage';
 import { sendSignedClientEmail, sendSignedStaffEmail } from '@/lib/email';
 import { renderToBuffer, type DocumentProps } from '@react-pdf/renderer';
 import { AgreementPDF } from '@/lib/pdf';
@@ -51,8 +51,9 @@ export async function POST(
     }
 
     let customerId: string;
+    let paymentUrl: string;
     try {
-      ({ customerId } = await setupPayAdvantageDirectDebit(agreement));
+      ({ customerId, paymentUrl } = await setupPayAdvantagePayment(agreement));
     } catch (paErr) {
       const msg = paErr instanceof Error ? paErr.message : String(paErr);
       console.error('Pay Advantage error:', msg);
@@ -83,7 +84,7 @@ export async function POST(
       }
     })();
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ paymentUrl });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error('POST /api/agreements/[id]/sign error:', msg);
