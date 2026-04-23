@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { setupPayAdvantageDirectDebit } from '@/lib/payadvantage';
+import { sendSignedClientEmail, sendSignedStaffEmail } from '@/lib/email';
+import { renderToBuffer, type DocumentProps } from '@react-pdf/renderer';
+import { AgreementPDF } from '@/lib/pdf';
+import React from 'react';
 import type { Agreement } from '@/types';
 
 export const runtime = 'nodejs';
@@ -62,6 +66,22 @@ export async function POST(
        WHERE id = ?`,
       [signature_data, now, customerId, id]
     );
+
+    // Send signed emails (PDF attached) — fire and forget, don't block response
+    const signedAgreement: Agreement = { ...agreement, signed_at: now, status: 'signed' };
+    (async () => {
+      try {
+        const pdfBuffer = await renderToBuffer(
+          React.createElement(AgreementPDF, { agreement: signedAgreement }) as React.ReactElement<DocumentProps>
+        );
+        await Promise.all([
+          sendSignedClientEmail(signedAgreement, Buffer.from(pdfBuffer)),
+          sendSignedStaffEmail(signedAgreement),
+        ]);
+      } catch (emailErr) {
+        console.error('Failed to send signed emails:', emailErr);
+      }
+    })();
 
     return NextResponse.json({ ok: true });
   } catch (err) {
