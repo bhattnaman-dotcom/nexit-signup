@@ -8,8 +8,12 @@ interface PATokenResponse {
 }
 
 interface PACustomerResponse {
-  id: string;
+  id?: string;
+  customerId?: string;
+  customer_id?: string;
   iframeUrl?: string;
+  embedUrl?: string;
+  paymentUrl?: string;
 }
 
 async function getBearerToken(): Promise<string> {
@@ -72,13 +76,22 @@ export async function createPayAdvantageCustomer(
   }
 
   const data: PACustomerResponse = await res.json();
+  console.log('PA customer response:', JSON.stringify(data));
+
+  const customerId = data.id ?? data.customerId ?? data.customer_id;
+  if (!customerId) {
+    throw new Error(`Pay Advantage customer creation returned no ID. Response: ${JSON.stringify(data)}`);
+  }
+
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!;
   const returnUrl = encodeURIComponent(`${baseUrl}/agreement/${agreement.id}/signed`);
   const iframeUrl =
     data.iframeUrl ??
-    `${base}/embed/payment/${data.id}?reference=${agreement.id}&returnUrl=${returnUrl}`;
+    data.embedUrl ??
+    data.paymentUrl ??
+    `${base}/embed/payment/${customerId}?reference=${agreement.id}&returnUrl=${returnUrl}`;
 
-  return { customerId: data.id, iframeUrl };
+  return { customerId, iframeUrl };
 }
 
 export function verifyWebhookSignature(
