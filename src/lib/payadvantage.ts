@@ -51,10 +51,6 @@ export async function createPayAdvantageCustomer(
   const token = await getBearerToken();
   const base = process.env.PAY_ADVANTAGE_BASE_URL!;
 
-  const nameParts = agreement.customer_name.trim().split(' ');
-  const firstName = nameParts[0] ?? '';
-  const lastName = nameParts.slice(1).join(' ') || firstName;
-
   const res = await fetch(`${base}/customers`, {
     method: 'POST',
     headers: {
@@ -62,8 +58,7 @@ export async function createPayAdvantageCustomer(
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
-      firstName,
-      lastName,
+      name: agreement.customer_name.trim(),
       email: agreement.customer_email,
       phone: agreement.customer_phone,
       reference: agreement.id,
