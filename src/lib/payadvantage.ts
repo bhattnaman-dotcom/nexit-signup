@@ -92,8 +92,10 @@ export async function createPayAdvantageCustomer(
     },
     body: JSON.stringify({
       Customer: { Code: customerId },
-      Amount: 0,
-      Description: 'Direct debit / card on file setup',
+      Amount: agreement.price,
+      Description: agreement.billing_type === 'recurring'
+        ? `NexIT retainer — ${agreement.business_name}`
+        : `NexIT services — ${agreement.business_name}`,
       PaymentOptions: ['creditcard'],
     }),
   });
