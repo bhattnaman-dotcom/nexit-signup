@@ -268,9 +268,10 @@ export default function AgreementView({ agreement }: { agreement: Agreement }) {
             <iframe
               src={iframeUrl}
               className="w-full rounded-xl border border-gray-200"
-              style={{ minHeight: '480px', border: 'none' }}
+              style={{ height: '700px', border: 'none' }}
               title="Payment Setup"
               allow="payment"
+              scrolling="no"
             />
           ) : (
             <div className="flex items-center justify-center h-48 text-gray-400 text-sm">
