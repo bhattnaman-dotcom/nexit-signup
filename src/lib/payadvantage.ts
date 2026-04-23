@@ -8,6 +8,7 @@ interface PATokenResponse {
 }
 
 interface PACustomerResponse {
+  Code?: string;
   id?: string;
   customerId?: string;
   customer_id?: string;
@@ -78,18 +79,19 @@ export async function createPayAdvantageCustomer(
   const data: PACustomerResponse = await res.json();
   console.log('PA customer response:', JSON.stringify(data));
 
-  const customerId = data.id ?? data.customerId ?? data.customer_id;
+  const customerId = data.Code ?? data.id ?? data.customerId ?? data.customer_id;
   if (!customerId) {
     throw new Error(`Pay Advantage customer creation returned no ID. Response: ${JSON.stringify(data)}`);
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!;
   const returnUrl = encodeURIComponent(`${baseUrl}/agreement/${agreement.id}/signed`);
+  const embedBase = 'https://secure.payadvantage.com.au';
   const iframeUrl =
     data.iframeUrl ??
     data.embedUrl ??
     data.paymentUrl ??
-    `${base}/embed/payment/${customerId}?reference=${agreement.id}&returnUrl=${returnUrl}`;
+    `${embedBase}/embed/payment/${customerId}?reference=${agreement.id}&returnUrl=${returnUrl}`;
 
   return { customerId, iframeUrl };
 }
