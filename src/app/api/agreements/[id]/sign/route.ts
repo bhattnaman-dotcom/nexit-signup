@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
-import { createPayAdvantageCustomer } from '@/lib/payadvantage';
+import { setupPayAdvantageDirectDebit } from '@/lib/payadvantage';
 import type { Agreement } from '@/types';
 
 export const runtime = 'nodejs';
@@ -17,7 +17,6 @@ export async function POST(
       return NextResponse.json({ error: 'Missing signature_data' }, { status: 400 });
     }
 
-    // Fetch agreement
     const [rows] = await pool.query<any[]>(
       'SELECT * FROM agreements WHERE id = ?',
       [id]
@@ -40,29 +39,22 @@ export async function POST(
 
     const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
 
-    // Check Pay Advantage credentials are configured
     if (!process.env.PAY_ADVANTAGE_USERNAME || !process.env.PAY_ADVANTAGE_PASSWORD) {
       return NextResponse.json(
-        { error: 'Payment gateway not configured. Please set PAY_ADVANTAGE_USERNAME and PAY_ADVANTAGE_PASSWORD in Vercel environment variables.' },
+        { error: 'Payment gateway not configured. Set PAY_ADVANTAGE_USERNAME and PAY_ADVANTAGE_PASSWORD in Vercel.' },
         { status: 503 }
       );
     }
 
-    // Create Pay Advantage customer
     let customerId: string;
-    let iframeUrl: string;
     try {
-      ({ customerId, iframeUrl } = await createPayAdvantageCustomer(agreement));
+      ({ customerId } = await setupPayAdvantageDirectDebit(agreement));
     } catch (paErr) {
       const msg = paErr instanceof Error ? paErr.message : String(paErr);
       console.error('Pay Advantage error:', msg);
-      return NextResponse.json(
-        { error: `Payment gateway error: ${msg}` },
-        { status: 502 }
-      );
+      return NextResponse.json({ error: `Payment gateway error: ${msg}` }, { status: 502 });
     }
 
-    // Save signature and update status
     await pool.execute(
       `UPDATE agreements
        SET signature_data = ?, signed_at = ?, status = 'signed',
@@ -71,7 +63,7 @@ export async function POST(
       [signature_data, now, customerId, id]
     );
 
-    return NextResponse.json({ iframeUrl });
+    return NextResponse.json({ ok: true });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error('POST /api/agreements/[id]/sign error:', msg);

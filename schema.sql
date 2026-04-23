@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS agreements (
   products                  JSON            NOT NULL,                 -- e.g. ["Local SEO","SMM"]
   price                     DECIMAL(10,2)   NOT NULL,
   billing_type              ENUM('once-off','recurring') NOT NULL,
+  billing_frequency         ENUM('weekly','fortnightly','monthly','quarterly','yearly') NULL,
 
   status                    ENUM('pending','signed','paid') NOT NULL DEFAULT 'pending',
 

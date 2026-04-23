@@ -28,6 +28,7 @@ export default function StaffFormPage() {
     other_product: '',
     price: '',
     billing_type: 'recurring' as 'once-off' | 'recurring',
+    billing_frequency: 'monthly' as 'weekly' | 'fortnightly' | 'monthly' | 'quarterly' | 'yearly',
   });
 
   const [otherChecked, setOtherChecked] = useState(false);
@@ -71,6 +72,7 @@ export default function StaffFormPage() {
           products,
           price: parseFloat(form.price),
           billing_type: form.billing_type,
+          billing_frequency: form.billing_type === 'recurring' ? form.billing_frequency : null,
         }),
       });
 
@@ -320,6 +322,24 @@ export default function StaffFormPage() {
                   ))}
                 </div>
               </div>
+
+              {form.billing_type === 'recurring' && (
+                <div>
+                  <label className={labelClass}>Billing Frequency *</label>
+                  <select
+                    value={form.billing_frequency}
+                    onChange={(e) => setForm((f) => ({ ...f, billing_frequency: e.target.value as typeof f.billing_frequency }))}
+                    className={inputClass}
+                    required
+                  >
+                    <option value="weekly">Weekly</option>
+                    <option value="fortnightly">Fortnightly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="yearly">Yearly</option>
+                  </select>
+                </div>
+              )}
             </div>
           </section>
 

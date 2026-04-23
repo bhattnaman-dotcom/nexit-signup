@@ -10,6 +10,7 @@ export interface Agreement {
   products: string[];
   price: number;
   billing_type: 'once-off' | 'recurring';
+  billing_frequency: 'weekly' | 'fortnightly' | 'monthly' | 'quarterly' | 'yearly' | null;
   status: 'pending' | 'signed' | 'paid';
   signature_data: string | null;
   signed_at: string | null;
@@ -27,6 +28,7 @@ export interface AdminAgreementRow {
   products: string[];
   price: number;
   billing_type: 'once-off' | 'recurring';
+  billing_frequency: 'weekly' | 'fortnightly' | 'monthly' | 'quarterly' | 'yearly' | null;
   status: 'pending' | 'signed' | 'paid';
   payment_status: 'unpaid' | 'processing' | 'paid' | 'failed';
 }

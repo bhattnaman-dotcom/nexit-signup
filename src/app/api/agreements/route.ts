@@ -18,6 +18,7 @@ export async function POST(req: NextRequest) {
       products,
       price,
       billing_type,
+      billing_frequency,
     } = body;
 
     if (
@@ -33,12 +34,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid billing_type' }, { status: 400 });
     }
 
+    const validFrequencies = ['weekly', 'fortnightly', 'monthly', 'quarterly', 'yearly'];
+    const freq = billing_type === 'recurring' ? (billing_frequency ?? 'monthly') : null;
+    if (freq && !validFrequencies.includes(freq)) {
+      return NextResponse.json({ error: 'Invalid billing_frequency' }, { status: 400 });
+    }
+
     const id = uuidv4();
 
     await pool.execute(
       `INSERT INTO agreements
-        (id, staff_name, staff_email, prepared_date, business_name, customer_name, customer_email, customer_phone, products, price, billing_type, status, payment_status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'unpaid')`,
+        (id, staff_name, staff_email, prepared_date, business_name, customer_name, customer_email, customer_phone, products, price, billing_type, billing_frequency, status, payment_status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'unpaid')`,
       [
         id,
         staff_name,
@@ -51,6 +58,7 @@ export async function POST(req: NextRequest) {
         JSON.stringify(products),
         price,
         billing_type,
+        freq,
       ]
     );
 
