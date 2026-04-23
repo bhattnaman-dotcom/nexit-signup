@@ -56,7 +56,8 @@ export async function createPayAdvantageCustomer(
   const token = await getBearerToken();
   const base = process.env.PAY_ADVANTAGE_BASE_URL!;
 
-  const res = await fetch(`${base}/customers`, {
+  // Step 1: create customer
+  const customerRes = await fetch(`${base}/customers`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -70,28 +71,45 @@ export async function createPayAdvantageCustomer(
     }),
   });
 
-  if (!res.ok) {
+  if (!customerRes.ok) {
     let detail = '';
-    try { detail = ` — ${await res.text()}`; } catch { /* ignore */ }
-    throw new Error(`Pay Advantage customer creation error: ${res.status}${detail}`);
+    try { detail = ` — ${await customerRes.text()}`; } catch { /* ignore */ }
+    throw new Error(`Pay Advantage customer creation error: ${customerRes.status}${detail}`);
   }
 
-  const data: PACustomerResponse = await res.json();
-  console.log('PA customer response:', JSON.stringify(data));
-
-  const customerId = data.Code ?? data.id ?? data.customerId ?? data.customer_id;
+  const customer: PACustomerResponse = await customerRes.json();
+  const customerId = customer.Code ?? customer.id ?? customer.customerId ?? customer.customer_id;
   if (!customerId) {
-    throw new Error(`Pay Advantage customer creation returned no ID. Response: ${JSON.stringify(data)}`);
+    throw new Error(`Pay Advantage customer creation returned no ID. Response: ${JSON.stringify(customer)}`);
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!;
-  const returnUrl = encodeURIComponent(`${baseUrl}/agreement/${agreement.id}/signed`);
-  const embedBase = 'https://secure.payadvantage.com.au';
-  const iframeUrl =
-    data.iframeUrl ??
-    data.embedUrl ??
-    data.paymentUrl ??
-    `${embedBase}/embed/payment/${customerId}?reference=${agreement.id}&returnUrl=${returnUrl}`;
+  // Step 2: create payment iframe (nonce-based URL)
+  const iframeRes = await fetch(`${base}/payment_iframes`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      Customer: { Code: customerId },
+      Amount: 0,
+      Description: 'Direct debit / card on file setup',
+    }),
+  });
+
+  if (!iframeRes.ok) {
+    let detail = '';
+    try { detail = ` — ${await iframeRes.text()}`; } catch { /* ignore */ }
+    throw new Error(`Pay Advantage iframe creation error: ${iframeRes.status}${detail}`);
+  }
+
+  const iframeData = await iframeRes.json();
+  console.log('PA iframe response:', JSON.stringify(iframeData));
+
+  const iframeUrl = iframeData.IFrameUrl ?? iframeData.iframeUrl ?? iframeData.Url ?? iframeData.url;
+  if (!iframeUrl) {
+    throw new Error(`Pay Advantage iframe creation returned no URL. Response: ${JSON.stringify(iframeData)}`);
+  }
 
   return { customerId, iframeUrl };
 }
