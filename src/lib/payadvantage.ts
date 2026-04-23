@@ -94,6 +94,7 @@ export async function setupPayAdvantageDirectDebit(
         RecurringDateStart: startDateStr,
         ReminderDays: 1,
         OnchargedFees: [],
+        FailureOption: 'AddToNextInstalment',
         ExternalID: agreement.id,
       }),
     });
