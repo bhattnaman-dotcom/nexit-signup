@@ -57,6 +57,7 @@ export async function setupPayAdvantageDirectDebit(
     body: JSON.stringify({
       name: agreement.customer_name.trim(),
       email: agreement.customer_email,
+      mobile: agreement.customer_phone,
       phone: agreement.customer_phone,
       reference: agreement.id,
     }),
