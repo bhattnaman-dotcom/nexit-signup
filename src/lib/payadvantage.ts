@@ -84,6 +84,9 @@ export async function createPayAdvantageCustomer(
   }
 
   // Step 2: create payment iframe (nonce-based URL)
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!;
+  const returnUrl = `${baseUrl}/agreement/${agreement.id}/signed`;
+
   const iframeRes = await fetch(`${base}/payment_iframes`, {
     method: 'POST',
     headers: {
@@ -97,6 +100,7 @@ export async function createPayAdvantageCustomer(
         ? `NexIT retainer — ${agreement.business_name}`
         : `NexIT services — ${agreement.business_name}`,
       PaymentOptions: ['creditcard'],
+      ReturnUrl: returnUrl,
     }),
   });
 
