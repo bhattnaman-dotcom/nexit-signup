@@ -83,10 +83,7 @@ export async function createPayAdvantageCustomer(
     throw new Error(`Pay Advantage customer creation returned no ID. Response: ${JSON.stringify(customer)}`);
   }
 
-  // Step 2: create payment iframe (nonce-based URL)
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!;
-  const returnUrl = `${baseUrl}/agreement/${agreement.id}/signed`;
-
+  // Step 2: create payment iframe (nonce-based URL, Amount:0 = tokenise card without charging)
   const iframeRes = await fetch(`${base}/payment_iframes`, {
     method: 'POST',
     headers: {
@@ -95,12 +92,9 @@ export async function createPayAdvantageCustomer(
     },
     body: JSON.stringify({
       Customer: { Code: customerId },
-      Amount: agreement.price,
-      Description: agreement.billing_type === 'recurring'
-        ? `NexIT retainer — ${agreement.business_name}`
-        : `NexIT services — ${agreement.business_name}`,
+      Amount: 0,
+      Description: `NexIT — ${agreement.business_name} — card on file`,
       PaymentOptions: ['creditcard'],
-      ReturnUrl: returnUrl,
     }),
   });
 

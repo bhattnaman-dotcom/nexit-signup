@@ -25,7 +25,21 @@ export default function AgreementView({ agreement }: { agreement: Agreement }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  // Poll for payment completion after signing
+  // Listen for postMessage from PA iframe (fires when card saved or payment complete)
+  useEffect(() => {
+    if (stage !== 'payment') return;
+    const handler = (event: MessageEvent) => {
+      if (!event.origin.includes('payadvantage.com.au')) return;
+      console.log('PA iframe message:', event.data);
+      const d = typeof event.data === 'string' ? (() => { try { return JSON.parse(event.data); } catch { return {}; } })() : event.data;
+      const isSuccess = d?.status === 'success' || d?.Status === 'Success' || d?.type === 'payment_complete' || d?.event === 'success';
+      if (isSuccess) router.push(`/agreement/${agreement.id}/signed`);
+    };
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, [stage, agreement.id, router]);
+
+  // Poll for payment completion (webhook-driven fallback)
   useEffect(() => {
     if (stage !== 'payment') return;
     const interval = setInterval(async () => {
