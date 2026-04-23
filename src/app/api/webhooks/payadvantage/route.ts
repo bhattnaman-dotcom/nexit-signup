@@ -29,8 +29,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (event !== 'payment.completed' && event !== 'subscription.created') {
-      // Non-payment events — acknowledge but do nothing
-      return NextResponse.json({ ok: true });
+      return NextResponse.json({ ok: true }, { status: 202 });
     }
 
     // Fetch agreement
@@ -45,8 +44,7 @@ export async function POST(req: NextRequest) {
 
     const row = rows[0];
     if (row.payment_status === 'paid') {
-      // Already processed — idempotent
-      return NextResponse.json({ ok: true });
+      return NextResponse.json({ ok: true }, { status: 202 });
     }
 
     const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
@@ -80,7 +78,7 @@ export async function POST(req: NextRequest) {
       sendStaffEmail(agreement),
     ]);
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true }, { status: 202 });
   } catch (err) {
     console.error('POST /api/webhooks/payadvantage error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

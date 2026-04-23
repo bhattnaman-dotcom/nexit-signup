@@ -41,9 +41,9 @@ export async function POST(
     const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
 
     // Check Pay Advantage credentials are configured
-    if (!process.env.PAY_ADVANTAGE_CLIENT_ID || !process.env.PAY_ADVANTAGE_CLIENT_SECRET) {
+    if (!process.env.PAY_ADVANTAGE_USERNAME || !process.env.PAY_ADVANTAGE_PASSWORD) {
       return NextResponse.json(
-        { error: 'Payment gateway not configured. Please set PAY_ADVANTAGE_CLIENT_ID and PAY_ADVANTAGE_CLIENT_SECRET in Vercel environment variables.' },
+        { error: 'Payment gateway not configured. Please set PAY_ADVANTAGE_USERNAME and PAY_ADVANTAGE_PASSWORD in Vercel environment variables.' },
         { status: 503 }
       );
     }

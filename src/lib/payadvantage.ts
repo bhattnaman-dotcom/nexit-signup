@@ -14,13 +14,14 @@ interface PACustomerResponse {
 
 async function getBearerToken(): Promise<string> {
   const base = process.env.PAY_ADVANTAGE_BASE_URL!;
-  const refreshToken = process.env.PAY_ADVANTAGE_REFRESH_TOKEN;
+  const username = process.env.PAY_ADVANTAGE_USERNAME;
+  const password = process.env.PAY_ADVANTAGE_PASSWORD;
   const tokenUrl = `${base}/token`;
 
-  if (!refreshToken) {
+  if (!username || !password) {
     throw new Error(
-      'PAY_ADVANTAGE_REFRESH_TOKEN is not set. ' +
-      'Visit /api/auth/payadvantage/authorize (while logged into admin) to complete the one-time Pay Advantage authorization.'
+      'PAY_ADVANTAGE_USERNAME or PAY_ADVANTAGE_PASSWORD is not set. ' +
+      'Add the API user credentials from the Pay Advantage portal (Setup → Credentials) as Vercel environment variables.'
     );
   }
 
@@ -28,15 +29,16 @@ async function getBearerToken(): Promise<string> {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      grant_type: 'refresh_token',
-      refresh_token: refreshToken,
+      grant_type: 'password',
+      username,
+      password,
     }),
   });
 
   if (!res.ok) {
     let detail = '';
     try { detail = ` — ${await res.text()}`; } catch { /* ignore */ }
-    throw new Error(`Pay Advantage token refresh error: ${res.status}${detail}`);
+    throw new Error(`Pay Advantage token error: ${res.status}${detail}`);
   }
 
   const data: PATokenResponse = await res.json();
