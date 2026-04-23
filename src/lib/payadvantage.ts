@@ -78,7 +78,7 @@ export async function setupPayAdvantageDirectDebit(
     // Step 2: create direct debit — PA emails the client an authorisation link
     const startDate = new Date();
     startDate.setDate(startDate.getDate() + 1);
-    const startDateStr = startDate.toISOString().split('T')[0] + 'T00:00:00';
+    const startDateStr = startDate.toISOString().split('T')[0];
 
     const ddRes = await fetch(`${base}/direct_debits`, {
       method: 'POST',
