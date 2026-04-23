@@ -31,5 +31,15 @@ export async function GET(req: NextRequest) {
     response_type: 'code',
   });
 
+  const debug = req.nextUrl.searchParams.get('debug');
+  if (debug === '1') {
+    return NextResponse.json({
+      authorize_url: authorizeUrl,
+      redirect_uri: redirectUri,
+      client_id: clientId,
+      full_url: `${authorizeUrl}?${params.toString()}`,
+    });
+  }
+
   return NextResponse.redirect(`${authorizeUrl}?${params.toString()}`);
 }
