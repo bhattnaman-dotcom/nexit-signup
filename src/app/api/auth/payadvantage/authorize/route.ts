@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
   const authorizeUrl =
     process.env.PAY_ADVANTAGE_AUTHORIZE_URL ??
-    'https://api.payadvantage.com.au/oauth/authorize';
+    'https://secure.payadvantage.com.au/authorize';
 
   if (!clientId || !baseUrl) {
     return NextResponse.json(

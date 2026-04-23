@@ -14,8 +14,6 @@ interface PACustomerResponse {
 
 async function getBearerToken(): Promise<string> {
   const base = process.env.PAY_ADVANTAGE_BASE_URL!;
-  const clientId = process.env.PAY_ADVANTAGE_CLIENT_ID!;
-  const clientSecret = process.env.PAY_ADVANTAGE_CLIENT_SECRET!;
   const refreshToken = process.env.PAY_ADVANTAGE_REFRESH_TOKEN;
   const tokenUrl = `${base}/token`;
 
@@ -26,15 +24,10 @@ async function getBearerToken(): Promise<string> {
     );
   }
 
-  const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
-
   const res = await fetch(tokenUrl, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      Authorization: `Basic ${credentials}`,
-    },
-    body: new URLSearchParams({
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
       grant_type: 'refresh_token',
       refresh_token: refreshToken,
     }),

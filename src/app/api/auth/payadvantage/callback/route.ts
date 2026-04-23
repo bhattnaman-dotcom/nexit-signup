@@ -33,19 +33,16 @@ export async function GET(req: NextRequest) {
   const redirectUri = `${baseUrl}/api/auth/payadvantage/callback`;
   const tokenUrl = `${base}/token`;
 
-  const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
-
   let tokenData: Record<string, string>;
   try {
     const res = await fetch(tokenUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        Authorization: `Basic ${credentials}`,
-      },
-      body: new URLSearchParams({
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         grant_type: 'authorization_code',
         code,
+        client_id: clientId,
+        client_secret: clientSecret,
         redirect_uri: redirectUri,
       }),
     });
