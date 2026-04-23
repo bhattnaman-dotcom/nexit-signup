@@ -94,7 +94,7 @@ export async function createPayAdvantageCustomer(
       Customer: { Code: customerId },
       Amount: 0,
       Description: 'Direct debit / card on file setup',
-      PaymentOptions: ['all'],
+      PaymentOptions: ['creditcard'],
     }),
   });
 

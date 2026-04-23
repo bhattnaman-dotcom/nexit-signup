@@ -260,7 +260,7 @@ export default function AgreementView({ agreement }: { agreement: Agreement }) {
 
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
             {agreement.billing_type === 'recurring'
-              ? 'Set Up Direct Debit / Card on File'
+              ? 'Set Up Card on File'
               : 'Complete Payment'}
           </h2>
 
