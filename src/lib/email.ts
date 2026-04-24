@@ -24,6 +24,85 @@ function billingLabel(agreement: Agreement): string {
   return `${freq.charAt(0).toUpperCase() + freq.slice(1)} — ${formatPrice(agreement.price)} AUD`;
 }
 
+// Sent when agreement is first created (or resent manually by staff)
+export async function sendAgreementLinkEmail(agreement: Agreement, agreementUrl: string): Promise<void> {
+  const products = agreement.products.join(', ');
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
+    .wrapper { max-width: 600px; margin: 0 auto; background: #fff; }
+    .header { background: #2C3275; padding: 32px 40px; text-align: center; }
+    .header h1 { color: #FAA63A; font-size: 24px; margin: 0 0 4px; letter-spacing: 1px; }
+    .header p { color: #a0a8d0; font-size: 13px; margin: 0; }
+    .hero { background: linear-gradient(135deg, #2C3275 0%, #3D4494 100%); padding: 28px 40px; }
+    .hero h2 { color: #fff; font-size: 20px; margin: 0 0 6px; }
+    .hero p { color: #c0c8f0; font-size: 14px; margin: 0; }
+    .body { padding: 32px 40px; }
+    .greeting { font-size: 16px; color: #1A1D36; margin-bottom: 16px; }
+    .summary { background: #f8f9ff; border-left: 4px solid #F47B20; border-radius: 4px; padding: 20px 24px; margin: 24px 0; }
+    .summary table { width: 100%; border-collapse: collapse; }
+    .summary td { padding: 6px 0; font-size: 14px; color: #333; vertical-align: top; }
+    .summary td:first-child { color: #666; width: 140px; font-weight: 600; }
+    .cta-wrap { text-align: center; margin: 32px 0; }
+    .cta { display: inline-block; background: #F47B20; color: #ffffff !important; text-decoration: none; padding: 16px 40px; border-radius: 10px; font-size: 16px; font-weight: 700; letter-spacing: 0.3px; }
+    .link-fallback { font-size: 12px; color: #999; text-align: center; margin-top: 12px; word-break: break-all; }
+    .footer { background: #1A1D36; padding: 24px 40px; text-align: center; }
+    .footer p { color: #6b7194; font-size: 12px; margin: 4px 0; }
+    .footer a { color: #FAA63A; text-decoration: none; }
+    .note { font-size: 13px; color: #666; margin-top: 24px; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <h1>NexIT Solutions</h1>
+      <p>Melbourne's Digital Growth Partner</p>
+    </div>
+    <div class="hero">
+      <h2>Your Service Agreement is Ready</h2>
+      <p>Please review and sign at your convenience</p>
+    </div>
+    <div class="body">
+      <p class="greeting">Hi ${agreement.customer_name},</p>
+      <p>Your service agreement with NexIT Solutions has been prepared and is ready for your review. Please click the button below to read, sign, and set up your payment.</p>
+      <div class="summary">
+        <table>
+          <tr><td>Business:</td><td>${agreement.business_name}</td></tr>
+          <tr><td>Services:</td><td>${products}</td></tr>
+          <tr><td>Investment:</td><td>${formatPrice(agreement.price)} AUD (incl. GST)</td></tr>
+          <tr><td>Prepared by:</td><td>${agreement.staff_name}</td></tr>
+        </table>
+      </div>
+      <div class="cta-wrap">
+        <a href="${agreementUrl}" class="cta">Review &amp; Sign Agreement →</a>
+      </div>
+      <p class="link-fallback">Or copy this link: ${agreementUrl}</p>
+      <p class="note">If you have any questions before signing, please reach out to our team at <a href="mailto:hello@nexit.com.au">hello@nexit.com.au</a> or call <a href="tel:0391932978">03 9193 2978</a>.</p>
+    </div>
+    <div class="footer">
+      <p><strong style="color:#FAA63A;">NexIT Solutions</strong></p>
+      <p>Melbourne, VIC, Australia · ABN 92 401 198 599</p>
+      <p><a href="mailto:hello@nexit.com.au">hello@nexit.com.au</a> &nbsp;·&nbsp; <a href="${baseUrl}">${baseUrl?.replace('https://', '')}</a></p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+  await transporter.sendMail({
+    from: `"NexIT Solutions" <${process.env.GMAIL_USER}>`,
+    to: agreement.customer_email,
+    subject: `Your NexIT Solutions Agreement is Ready — ${agreement.business_name}`,
+    html,
+  });
+}
+
 // Sent immediately when client signs the agreement
 export async function sendSignedClientEmail(agreement: Agreement, pdfBuffer: Buffer): Promise<void> {
   const products = agreement.products.join(', ');

@@ -4,6 +4,7 @@ import pool from '@/lib/db';
 import type { Agreement } from '@/types';
 import NexitLogo from '@/components/NexitLogo';
 import StatusBadge from '@/components/StatusBadge';
+import PendingActions from './PendingActions';
 
 async function getAgreement(id: string): Promise<Agreement | null> {
   const [rows] = await pool.query<any[]>(
@@ -70,8 +71,11 @@ export default async function AdminAgreementDetailPage({
             </h1>
             <p className="text-gray-400 text-sm mt-1 font-mono">{agreement.id}</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <StatusBadge status={agreement.status} className="text-sm px-3 py-1" />
+            {agreement.status === 'pending' && (
+              <PendingActions agreementId={agreement.id} />
+            )}
             {agreement.status !== 'pending' && (
               <a
                 href={`/api/admin/agreements/${agreement.id}/pdf`}
