@@ -23,8 +23,9 @@ export default function AgreementView({ agreement }: { agreement: Agreement }) {
   const [signatureData, setSignatureData] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [iframeUrl, setIframeUrl] = useState<string | null>(null);
 
-  // Poll for payment completion (webhook-driven)
+  // Poll for payment completion (webhook-driven fallback)
   useEffect(() => {
     if (stage !== 'payment') return;
     const interval = setInterval(async () => {
@@ -67,9 +68,14 @@ export default function AgreementView({ agreement }: { agreement: Agreement }) {
       }
 
       const data = await res.json();
-      // Redirect to PA's hosted payment page (full-page, avoids iframe restrictions)
-      window.location.href = data.paymentUrl;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (data.useIframe) {
+        setIframeUrl(data.paymentUrl);
+        setStage('payment');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        // Recurring: redirect to PA's DDR page (handles credit card + bank account)
+        window.location.href = data.paymentUrl;
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
@@ -247,9 +253,42 @@ export default function AgreementView({ agreement }: { agreement: Agreement }) {
       )}
 
       {stage === 'payment' && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
-          <div className="w-10 h-10 border-2 border-gray-200 border-t-nexit-orange rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-sm text-gray-500">Redirecting to secure payment…</p>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          {/* Payment step header */}
+          <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100 bg-gray-50">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-100 shrink-0">
+              <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-nexit-dark">Agreement Signed</p>
+              <p className="text-xs text-gray-400">Step 2 of 2 — Complete your payment below</p>
+            </div>
+            <div className="ml-auto flex items-center gap-1.5">
+              <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+              </svg>
+              <span className="text-xs text-gray-400">Secure payment</span>
+            </div>
+          </div>
+
+          {/* Embedded payment form */}
+          {iframeUrl ? (
+            <iframe
+              src={iframeUrl}
+              width="100%"
+              height="460"
+              scrolling="no"
+              title="Secure Payment"
+              style={{ border: 'none', display: 'block' }}
+            />
+          ) : (
+            <div className="p-10 text-center">
+              <div className="w-8 h-8 border-2 border-gray-200 border-t-nexit-orange rounded-full animate-spin mx-auto mb-3" />
+              <p className="text-sm text-gray-400">Loading payment form…</p>
+            </div>
+          )}
         </div>
       )}
     </main>

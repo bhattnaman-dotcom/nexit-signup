@@ -12,8 +12,10 @@ CREATE TABLE IF NOT EXISTS agreements (
   customer_name             VARCHAR(100)    NOT NULL,
   customer_email            VARCHAR(100)    NOT NULL,
   customer_phone            VARCHAR(20)     NOT NULL,
+  customer_abn              VARCHAR(20)     NULL,
 
   products                  JSON            NOT NULL,                 -- e.g. ["Local SEO","SMM"]
+  breakdown_notes           TEXT            NULL,
   price                     DECIMAL(10,2)   NOT NULL,
   billing_type              ENUM('once-off','recurring') NOT NULL,
   billing_frequency         ENUM('weekly','fortnightly','monthly','quarterly','yearly') NULL,
@@ -34,3 +36,7 @@ CREATE TABLE IF NOT EXISTS agreements (
   INDEX idx_business_name   (business_name),
   INDEX idx_customer_name   (customer_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Run these ALTER statements on an existing database:
+-- ALTER TABLE agreements ADD COLUMN customer_abn VARCHAR(20) NULL AFTER customer_phone;
+-- ALTER TABLE agreements ADD COLUMN breakdown_notes TEXT NULL AFTER products;

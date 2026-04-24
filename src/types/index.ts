@@ -7,7 +7,9 @@ export interface Agreement {
   customer_name: string;
   customer_email: string;
   customer_phone: string;
+  customer_abn: string | null;
   products: string[];
+  breakdown_notes: string | null;
   price: number;
   billing_type: 'once-off' | 'recurring';
   billing_frequency: 'weekly' | 'fortnightly' | 'monthly' | 'quarterly' | 'yearly' | null;

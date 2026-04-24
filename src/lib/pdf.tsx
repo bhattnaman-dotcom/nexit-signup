@@ -21,6 +21,7 @@ const navy = '#2C3275';
 const dark = '#1A1D36';
 const lightGrey = '#f5f5f5';
 const midGrey = '#666666';
+const NEXIT_ABN = '92 401 198 599';
 
 const styles = StyleSheet.create({
   page: {
@@ -106,6 +107,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 10,
     marginRight: 4,
+    marginBottom: 4,
   },
   pillsRow: {
     flexDirection: 'row',
@@ -124,6 +126,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 10,
+  },
+  breakdownBox: {
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 4,
+    padding: 10,
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  breakdownLabel: {
+    fontSize: 8,
+    color: midGrey,
+    fontFamily: 'Helvetica-Bold',
+    marginBottom: 6,
+  },
+  breakdownLine: {
+    fontSize: 8.5,
+    color: dark,
+    lineHeight: 1.6,
   },
   tcSection: {
     marginBottom: 10,
@@ -170,9 +192,6 @@ const styles = StyleSheet.create({
     fontSize: 7,
     color: midGrey,
   },
-  pageBreak: {
-    marginTop: 20,
-  },
   divider: {
     borderBottomWidth: 1,
     borderBottomColor: '#eeeeee',
@@ -189,12 +208,21 @@ function formatDate(iso: string | null): string {
   return new Date(iso).toLocaleString('en-AU', { timeZone: 'Australia/Melbourne' });
 }
 
+function billingLabel(agreement: Agreement): string {
+  if (agreement.billing_type === 'once-off') return 'Once-off Payment';
+  const freq = agreement.billing_frequency ?? 'monthly';
+  return `Recurring — ${freq.charAt(0).toUpperCase() + freq.slice(1)}`;
+}
+
 interface AgreementPDFProps {
   agreement: Agreement;
 }
 
 export function AgreementPDF({ agreement }: AgreementPDFProps) {
   const preparedDate = new Date(agreement.prepared_date).toLocaleDateString('en-AU');
+  const breakdownLines = agreement.breakdown_notes
+    ? agreement.breakdown_notes.split('\n').filter(Boolean)
+    : [];
 
   return (
     <Document
@@ -208,7 +236,7 @@ export function AgreementPDF({ agreement }: AgreementPDFProps) {
         <View style={styles.header}>
           <View>
             <Text style={styles.headerTitle}>NexIT Solutions</Text>
-            <Text style={styles.headerSub}>Melbourne's Digital Growth Partner</Text>
+            <Text style={styles.headerSub}>ABN {NEXIT_ABN} · Melbourne's Digital Growth Partner</Text>
           </View>
           <Text style={styles.headerBadge}>SERVICE AGREEMENT</Text>
         </View>
@@ -240,6 +268,12 @@ export function AgreementPDF({ agreement }: AgreementPDFProps) {
               <Text style={styles.label}>Business Name:</Text>
               <Text style={styles.value}>{agreement.business_name}</Text>
             </View>
+            {agreement.customer_abn ? (
+              <View style={styles.row}>
+                <Text style={styles.label}>Client ABN:</Text>
+                <Text style={styles.value}>{agreement.customer_abn}</Text>
+              </View>
+            ) : null}
             <View style={styles.row}>
               <Text style={styles.label}>Contact Name:</Text>
               <Text style={styles.value}>{agreement.customer_name}</Text>
@@ -255,7 +289,7 @@ export function AgreementPDF({ agreement }: AgreementPDFProps) {
           </View>
 
           {/* Services & Pricing */}
-          <Text style={styles.sectionTitle}>Services & Pricing</Text>
+          <Text style={styles.sectionTitle}>Services &amp; Pricing</Text>
           <View style={styles.card}>
             <View style={styles.row}>
               <Text style={styles.label}>Services:</Text>
@@ -265,21 +299,31 @@ export function AgreementPDF({ agreement }: AgreementPDFProps) {
                 ))}
               </View>
             </View>
-            <View style={[styles.row, { marginTop: 8 }]}>
-              <Text style={styles.label}>Investment:</Text>
-              <Text style={[styles.value, { fontFamily: 'Helvetica-Bold', fontSize: 12 }]}>
+
+            {breakdownLines.length > 0 && (
+              <View style={styles.breakdownBox}>
+                <Text style={styles.breakdownLabel}>PRICING BREAKDOWN</Text>
+                {breakdownLines.map((line, i) => (
+                  <Text key={i} style={styles.breakdownLine}>{line}</Text>
+                ))}
+              </View>
+            )}
+
+            <View style={[styles.row, { marginTop: 10 }]}>
+              <Text style={styles.label}>Total Investment:</Text>
+              <Text style={[styles.value, { fontFamily: 'Helvetica-Bold', fontSize: 13, color: dark }]}>
                 {formatPrice(agreement.price)} AUD (incl. GST)
               </Text>
             </View>
             <View style={styles.row}>
-              <Text style={styles.label}>Billing Type:</Text>
+              <Text style={styles.label}>Billing:</Text>
               <Text
                 style={[
                   styles.billingBadge,
                   { backgroundColor: agreement.billing_type === 'recurring' ? navy : orange },
                 ]}
               >
-                {agreement.billing_type === 'recurring' ? 'Recurring Monthly' : 'Once-off Payment'}
+                {billingLabel(agreement)}
               </Text>
             </View>
           </View>
@@ -315,7 +359,7 @@ export function AgreementPDF({ agreement }: AgreementPDFProps) {
 
         {/* Footer */}
         <View style={styles.footer} fixed>
-          <Text style={styles.footerText}>NexIT Solutions (ABN [ABN]) · Melbourne, VIC</Text>
+          <Text style={styles.footerText}>NexIT Solutions (ABN {NEXIT_ABN}) · Melbourne, VIC</Text>
           <Text style={styles.footerText}>hello@nexit.com.au · nexit.com.au</Text>
         </View>
       </Page>
@@ -325,9 +369,9 @@ export function AgreementPDF({ agreement }: AgreementPDFProps) {
         <View style={styles.header}>
           <View>
             <Text style={styles.headerTitle}>NexIT Solutions</Text>
-            <Text style={styles.headerSub}>Melbourne's Digital Growth Partner</Text>
+            <Text style={styles.headerSub}>ABN {NEXIT_ABN} · Melbourne's Digital Growth Partner</Text>
           </View>
-          <Text style={styles.headerBadge}>TERMS & CONDITIONS</Text>
+          <Text style={styles.headerBadge}>TERMS &amp; CONDITIONS</Text>
         </View>
 
         <View style={styles.body}>
@@ -336,7 +380,7 @@ export function AgreementPDF({ agreement }: AgreementPDFProps) {
           </Text>
           <Text style={[styles.tcText, { marginBottom: 16, color: midGrey }]}>
             These Terms and Conditions govern the provision of digital marketing services by NexIT
-            Solutions (ABN [ABN]) to the Client identified in the Service Agreement. By signing the
+            Solutions (ABN {NEXIT_ABN}) to the Client identified in the Service Agreement. By signing the
             Service Agreement, the Client agrees to be bound by these Terms and Conditions. Governing
             law: Victoria, Australia.
           </Text>
@@ -352,7 +396,7 @@ export function AgreementPDF({ agreement }: AgreementPDFProps) {
         </View>
 
         <View style={styles.footer} fixed>
-          <Text style={styles.footerText}>NexIT Solutions (ABN [ABN]) · Melbourne, VIC</Text>
+          <Text style={styles.footerText}>NexIT Solutions (ABN {NEXIT_ABN}) · Melbourne, VIC</Text>
           <Text style={styles.footerText}>hello@nexit.com.au · nexit.com.au</Text>
         </View>
       </Page>

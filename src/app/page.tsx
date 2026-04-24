@@ -24,8 +24,10 @@ export default function StaffFormPage() {
     customer_name: '',
     customer_email: '',
     customer_phone: '',
+    customer_abn: '',
     products: [] as string[],
     other_product: '',
+    breakdown_notes: '',
     price: '',
     billing_type: 'recurring' as 'once-off' | 'recurring',
     billing_frequency: 'monthly' as 'weekly' | 'fortnightly' | 'monthly' | 'quarterly' | 'yearly',
@@ -69,7 +71,9 @@ export default function StaffFormPage() {
           customer_name: form.customer_name,
           customer_email: form.customer_email,
           customer_phone: form.customer_phone,
+          customer_abn: form.customer_abn.trim() || null,
           products,
+          breakdown_notes: form.breakdown_notes.trim() || null,
           price: parseFloat(form.price),
           billing_type: form.billing_type,
           billing_frequency: form.billing_type === 'recurring' ? form.billing_frequency : null,
@@ -204,7 +208,7 @@ export default function StaffFormPage() {
                   placeholder="0400 000 000"
                 />
               </div>
-              <div className="sm:col-span-2">
+              <div>
                 <label className={labelClass}>Customer Email *</label>
                 <input
                   type="email"
@@ -213,6 +217,20 @@ export default function StaffFormPage() {
                   onChange={(e) => setForm((f) => ({ ...f, customer_email: e.target.value }))}
                   className={inputClass}
                   placeholder="jane@acme.com.au"
+                />
+              </div>
+              <div>
+                <label className={labelClass}>
+                  Client ABN{' '}
+                  <span className="text-gray-400 font-normal">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  value={form.customer_abn}
+                  onChange={(e) => setForm((f) => ({ ...f, customer_abn: e.target.value }))}
+                  className={inputClass}
+                  placeholder="12 345 678 901"
+                  maxLength={14}
                 />
               </div>
             </div>
@@ -274,6 +292,21 @@ export default function StaffFormPage() {
                   </div>
                 )}
               </div>
+            </div>
+
+            {/* Pricing Breakdown Notes */}
+            <div className="mb-6">
+              <label className={labelClass}>
+                Pricing Breakdown{' '}
+                <span className="text-gray-400 font-normal">(optional — shown on PDF)</span>
+              </label>
+              <textarea
+                value={form.breakdown_notes}
+                onChange={(e) => setForm((f) => ({ ...f, breakdown_notes: e.target.value }))}
+                className={`${inputClass} resize-none`}
+                rows={5}
+                placeholder={`e.g.\n$1,000/week short-term campaign\n$1,000 × 4 weeks = $4,000\n$4,000 × 30% NexIT fee = $1,200 incl. GST`}
+              />
             </div>
 
             {/* Price & Billing */}

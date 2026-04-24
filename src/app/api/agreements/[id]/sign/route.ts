@@ -52,8 +52,9 @@ export async function POST(
 
     let customerId: string;
     let paymentUrl: string;
+    let useIframe: boolean;
     try {
-      ({ customerId, paymentUrl } = await setupPayAdvantagePayment(agreement));
+      ({ customerId, paymentUrl, useIframe } = await setupPayAdvantagePayment(agreement));
     } catch (paErr) {
       const msg = paErr instanceof Error ? paErr.message : String(paErr);
       console.error('Pay Advantage error:', msg);
@@ -84,7 +85,7 @@ export async function POST(
       }
     })();
 
-    return NextResponse.json({ paymentUrl });
+    return NextResponse.json({ paymentUrl, useIframe });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error('POST /api/agreements/[id]/sign error:', msg);

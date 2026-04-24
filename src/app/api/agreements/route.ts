@@ -15,7 +15,9 @@ export async function POST(req: NextRequest) {
       customer_name,
       customer_email,
       customer_phone,
+      customer_abn,
       products,
+      breakdown_notes,
       price,
       billing_type,
       billing_frequency,
@@ -44,8 +46,8 @@ export async function POST(req: NextRequest) {
 
     await pool.execute(
       `INSERT INTO agreements
-        (id, staff_name, staff_email, prepared_date, business_name, customer_name, customer_email, customer_phone, products, price, billing_type, billing_frequency, status, payment_status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'unpaid')`,
+        (id, staff_name, staff_email, prepared_date, business_name, customer_name, customer_email, customer_phone, customer_abn, products, breakdown_notes, price, billing_type, billing_frequency, status, payment_status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'unpaid')`,
       [
         id,
         staff_name,
@@ -55,7 +57,9 @@ export async function POST(req: NextRequest) {
         customer_name,
         customer_email,
         customer_phone,
+        customer_abn ?? null,
         JSON.stringify(products),
+        breakdown_notes ?? null,
         price,
         billing_type,
         freq,
