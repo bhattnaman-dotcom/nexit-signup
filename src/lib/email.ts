@@ -77,10 +77,6 @@ export async function sendSignedClientEmail(agreement: Agreement, pdfBuffer: Buf
           <tr><td>Signed:</td><td>${formatDate(agreement.signed_at)}</td></tr>
         </table>
       </div>
-      ${agreement.billing_type === 'recurring' ? `
-      <div class="callout">
-        📧 <strong>Next step:</strong> You will shortly receive a separate email from Pay Advantage to authorise your direct debit. Please check your inbox (and spam folder) and follow the link to complete your payment setup.
-      </div>` : ''}
       <p class="note">If you have any questions, please reach out to our team at <a href="mailto:hello@nexit.com.au">hello@nexit.com.au</a>.</p>
       <p class="note">We look forward to working with you and helping ${agreement.business_name} grow online.</p>
     </div>
