@@ -13,7 +13,7 @@ export interface Agreement {
   price: number;
   billing_type: 'once-off' | 'recurring';
   billing_frequency: 'weekly' | 'fortnightly' | 'monthly' | 'quarterly' | 'yearly' | null;
-  status: 'pending' | 'signed' | 'paid';
+  status: 'pending' | 'signed' | 'paid' | 'voided';
   signature_data: string | null;
   signed_at: string | null;
   payadvantage_customer_id: string | null;
@@ -31,6 +31,6 @@ export interface AdminAgreementRow {
   price: number;
   billing_type: 'once-off' | 'recurring';
   billing_frequency: 'weekly' | 'fortnightly' | 'monthly' | 'quarterly' | 'yearly' | null;
-  status: 'pending' | 'signed' | 'paid';
+  status: 'pending' | 'signed' | 'paid' | 'voided';
   payment_status: 'unpaid' | 'processing' | 'paid' | 'failed';
 }

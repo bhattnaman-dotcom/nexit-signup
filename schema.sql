@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS agreements (
   billing_type              ENUM('once-off','recurring') NOT NULL,
   billing_frequency         ENUM('weekly','fortnightly','monthly','quarterly','yearly') NULL,
 
-  status                    ENUM('pending','signed','paid') NOT NULL DEFAULT 'pending',
+  status                    ENUM('pending','signed','paid','voided') NOT NULL DEFAULT 'pending',
 
   signature_data            LONGTEXT,                                 -- base64 PNG data URL
   signed_at                 DATETIME,
@@ -40,3 +40,4 @@ CREATE TABLE IF NOT EXISTS agreements (
 -- Run these ALTER statements on an existing database:
 -- ALTER TABLE agreements ADD COLUMN customer_abn VARCHAR(20) NULL AFTER customer_phone;
 -- ALTER TABLE agreements ADD COLUMN breakdown_notes TEXT NULL AFTER products;
+-- ALTER TABLE agreements MODIFY COLUMN status ENUM('pending','signed','paid','voided') NOT NULL DEFAULT 'pending';

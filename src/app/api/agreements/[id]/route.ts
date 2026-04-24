@@ -97,3 +97,20 @@ export async function PATCH(
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const [rows] = await pool.query<any[]>('SELECT status FROM agreements WHERE id = ?', [id]);
+    if (!rows.length) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+    await pool.execute('DELETE FROM agreements WHERE id = ?', [id]);
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error('DELETE /api/agreements/[id] error:', err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
