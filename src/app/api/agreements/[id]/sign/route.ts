@@ -69,21 +69,19 @@ export async function POST(
       [signature_data, now, customerId, id]
     );
 
-    // Send signed emails (PDF attached) — fire and forget, don't block response
+    // Send signed emails (PDF attached) — awaited so serverless doesn't terminate early
     const signedAgreement: Agreement = { ...agreement, signed_at: now, status: 'signed' };
-    (async () => {
-      try {
-        const pdfBuffer = await renderToBuffer(
-          React.createElement(AgreementPDF, { agreement: signedAgreement }) as React.ReactElement<DocumentProps>
-        );
-        await Promise.all([
-          sendSignedClientEmail(signedAgreement, Buffer.from(pdfBuffer)),
-          sendSignedStaffEmail(signedAgreement),
-        ]);
-      } catch (emailErr) {
-        console.error('Failed to send signed emails:', emailErr);
-      }
-    })();
+    try {
+      const pdfBuffer = await renderToBuffer(
+        React.createElement(AgreementPDF, { agreement: signedAgreement }) as React.ReactElement<DocumentProps>
+      );
+      await Promise.all([
+        sendSignedClientEmail(signedAgreement, Buffer.from(pdfBuffer)),
+        sendSignedStaffEmail(signedAgreement),
+      ]);
+    } catch (emailErr) {
+      console.error('Failed to send signed emails:', emailErr);
+    }
 
     return NextResponse.json({ paymentUrl, useIframe });
   } catch (err) {
