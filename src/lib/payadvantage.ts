@@ -115,16 +115,12 @@ export async function setupPayAdvantagePayment(
     console.log('PA direct debit response:', JSON.stringify(ddrData));
 
     const paymentUrl =
+      ddrData.AuthorisationLink?.Link ??
+      ddrData.AuthorisationLinks?.[0]?.Link ??
       ddrData.AuthorisationUrl ??
       ddrData.authorisationUrl ??
-      ddrData.AuthorizationUrl ??
-      ddrData.authorizationUrl ??
-      ddrData.SigningUrl ??
-      ddrData.signingUrl ??
       ddrData.Url ??
-      ddrData.url ??
-      ddrData.PaymentUrl ??
-      ddrData.paymentUrl;
+      ddrData.url;
 
     if (!paymentUrl) {
       throw new Error(`Pay Advantage direct debit returned no authorization URL. Response: ${JSON.stringify(ddrData)}`);
