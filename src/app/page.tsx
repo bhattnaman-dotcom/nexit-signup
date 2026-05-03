@@ -1,8 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import NexitLogo from '@/components/NexitLogo';
+
+interface StaffOption {
+  id: number;
+  name: string;
+  email: string;
+}
 
 const PRODUCTS = [
   'Website Design',
@@ -36,6 +42,15 @@ export default function StaffFormPage() {
   const [otherChecked, setOtherChecked] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [staffList, setStaffList] = useState<StaffOption[]>([]);
+  const [selectedStaffId, setSelectedStaffId] = useState<number | ''>('');
+
+  useEffect(() => {
+    fetch('/api/staff')
+      .then((r) => r.json())
+      .then((data) => { if (Array.isArray(data)) setStaffList(data); })
+      .catch(() => {});
+  }, []);
 
   function toggleProduct(p: string) {
     setForm((f) => ({
@@ -130,6 +145,29 @@ export default function StaffFormPage() {
               </div>
               <h2 className="text-lg font-semibold font-sora text-nexit-dark">Prepared By</h2>
             </div>
+            {staffList.length > 0 && (
+              <div className="mb-5">
+                <label className={labelClass}>Select from Staff Directory</label>
+                <select
+                  value={selectedStaffId}
+                  onChange={(e) => {
+                    const id = Number(e.target.value);
+                    setSelectedStaffId(id || '');
+                    if (id) {
+                      const s = staffList.find((x) => x.id === id);
+                      if (s) setForm((f) => ({ ...f, staff_name: s.name, staff_email: s.email }));
+                    }
+                  }}
+                  className={inputClass}
+                >
+                  <option value="">— Select staff member —</option>
+                  {staffList.map((s) => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-400 mt-1">Selecting a staff member auto-fills the fields below. You can still edit them manually.</p>
+              </div>
+            )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
                 <label className={labelClass}>Staff Name *</label>
@@ -137,7 +175,7 @@ export default function StaffFormPage() {
                   type="text"
                   required
                   value={form.staff_name}
-                  onChange={(e) => setForm((f) => ({ ...f, staff_name: e.target.value }))}
+                  onChange={(e) => { setSelectedStaffId(''); setForm((f) => ({ ...f, staff_name: e.target.value })); }}
                   className={inputClass}
                   placeholder="Jane Smith"
                 />
@@ -148,7 +186,7 @@ export default function StaffFormPage() {
                   type="email"
                   required
                   value={form.staff_email}
-                  onChange={(e) => setForm((f) => ({ ...f, staff_email: e.target.value }))}
+                  onChange={(e) => { setSelectedStaffId(''); setForm((f) => ({ ...f, staff_email: e.target.value })); }}
                   className={inputClass}
                   placeholder="jane@nexit.com.au"
                 />

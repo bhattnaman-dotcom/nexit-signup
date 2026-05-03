@@ -2,6 +2,14 @@
 -- Run this in your Hostinger MySQL database before first deployment.
 -- Database: nexit_onboarding
 
+CREATE TABLE IF NOT EXISTS staff (
+  id          INT           AUTO_INCREMENT PRIMARY KEY,
+  name        VARCHAR(100)  NOT NULL,
+  email       VARCHAR(100)  NOT NULL UNIQUE,
+  created_at  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS agreements (
   id                        VARCHAR(36)     PRIMARY KEY,              -- UUID v4
   staff_name                VARCHAR(100)    NOT NULL,
@@ -41,3 +49,4 @@ CREATE TABLE IF NOT EXISTS agreements (
 -- ALTER TABLE agreements ADD COLUMN customer_abn VARCHAR(20) NULL AFTER customer_phone;
 -- ALTER TABLE agreements ADD COLUMN breakdown_notes TEXT NULL AFTER products;
 -- ALTER TABLE agreements MODIFY COLUMN status ENUM('pending','signed','paid','voided') NOT NULL DEFAULT 'pending';
+-- CREATE TABLE IF NOT EXISTS staff (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100) NOT NULL, email VARCHAR(100) NOT NULL UNIQUE, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP);
