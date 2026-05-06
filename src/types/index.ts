@@ -13,6 +13,9 @@ export interface Agreement {
   price: number;
   billing_type: 'once-off' | 'recurring';
   billing_frequency: 'weekly' | 'fortnightly' | 'monthly' | 'quarterly' | 'yearly' | null;
+  sd_phase: string | null;
+  sd_scope: string | null;
+  sd_total_cost: number | null;
   status: 'pending' | 'signed' | 'paid' | 'voided';
   signature_data: string | null;
   signed_at: string | null;

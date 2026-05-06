@@ -23,6 +23,9 @@ export async function POST(req: NextRequest) {
       price,
       billing_type,
       billing_frequency,
+      sd_phase,
+      sd_scope,
+      sd_total_cost,
     } = body;
 
     if (
@@ -48,8 +51,8 @@ export async function POST(req: NextRequest) {
 
     await pool.execute(
       `INSERT INTO agreements
-        (id, staff_name, staff_email, prepared_date, business_name, customer_name, customer_email, customer_phone, customer_abn, products, breakdown_notes, price, billing_type, billing_frequency, status, payment_status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'unpaid')`,
+        (id, staff_name, staff_email, prepared_date, business_name, customer_name, customer_email, customer_phone, customer_abn, products, breakdown_notes, price, billing_type, billing_frequency, sd_phase, sd_scope, sd_total_cost, status, payment_status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'unpaid')`,
       [
         id,
         staff_name,
@@ -65,6 +68,9 @@ export async function POST(req: NextRequest) {
         price,
         billing_type,
         freq,
+        sd_phase ?? null,
+        sd_scope ?? null,
+        sd_total_cost ?? null,
       ]
     );
 
@@ -85,6 +91,9 @@ export async function POST(req: NextRequest) {
       price,
       billing_type,
       billing_frequency: freq,
+      sd_phase: sd_phase ?? null,
+      sd_scope: sd_scope ?? null,
+      sd_total_cost: sd_total_cost ?? null,
       status: 'pending',
       signature_data: null,
       signed_at: null,

@@ -12,8 +12,8 @@ export async function GET(
     const [rows] = await pool.query<any[]>(
       `SELECT id, staff_name, staff_email, prepared_date, business_name, customer_name,
               customer_email, customer_phone, customer_abn, products, breakdown_notes,
-              price, billing_type, billing_frequency, status,
-              signed_at, payadvantage_customer_id, payment_status, paid_at, created_at
+              price, billing_type, billing_frequency, sd_phase, sd_scope, sd_total_cost,
+              status, signed_at, payadvantage_customer_id, payment_status, paid_at, created_at
        FROM agreements WHERE id = ?`,
       [id]
     );
@@ -27,6 +27,7 @@ export async function GET(
       ...row,
       products: typeof row.products === 'string' ? JSON.parse(row.products) : row.products,
       price: Number(row.price),
+      sd_total_cost: row.sd_total_cost != null ? Number(row.sd_total_cost) : null,
       signature_data: null,
     };
 
@@ -49,6 +50,7 @@ export async function PATCH(
       staff_name, staff_email, prepared_date,
       business_name, customer_name, customer_email, customer_phone, customer_abn,
       products, breakdown_notes, price, billing_type, billing_frequency,
+      sd_phase, sd_scope, sd_total_cost,
     } = body;
 
     if (
@@ -81,12 +83,14 @@ export async function PATCH(
       `UPDATE agreements
        SET staff_name = ?, staff_email = ?, prepared_date = ?,
            business_name = ?, customer_name = ?, customer_email = ?, customer_phone = ?, customer_abn = ?,
-           products = ?, breakdown_notes = ?, price = ?, billing_type = ?, billing_frequency = ?
+           products = ?, breakdown_notes = ?, price = ?, billing_type = ?, billing_frequency = ?,
+           sd_phase = ?, sd_scope = ?, sd_total_cost = ?
        WHERE id = ?`,
       [
         staff_name, staff_email, prepared_date,
         business_name, customer_name, customer_email, customer_phone, customer_abn ?? null,
         JSON.stringify(products), breakdown_notes ?? null, price, billing_type, freq,
+        sd_phase ?? null, sd_scope ?? null, sd_total_cost ?? null,
         id,
       ]
     );

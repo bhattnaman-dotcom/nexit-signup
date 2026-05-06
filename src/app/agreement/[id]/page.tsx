@@ -6,7 +6,11 @@ import AgreementView from './AgreementView';
 
 async function getAgreement(id: string): Promise<Agreement | null> {
   const [rows] = await pool.query<any[]>(
-    'SELECT id, staff_name, staff_email, prepared_date, business_name, customer_name, customer_email, customer_phone, products, price, billing_type, status, signed_at, payadvantage_customer_id, payment_status, paid_at, created_at FROM agreements WHERE id = ?',
+    `SELECT id, staff_name, staff_email, prepared_date, business_name, customer_name, customer_email,
+            customer_phone, customer_abn, products, breakdown_notes, price, billing_type, billing_frequency,
+            sd_phase, sd_scope, sd_total_cost, status, signed_at, payadvantage_customer_id,
+            payment_status, paid_at, created_at
+     FROM agreements WHERE id = ?`,
     [id]
   );
   if (!rows.length) return null;
@@ -15,6 +19,7 @@ async function getAgreement(id: string): Promise<Agreement | null> {
     ...row,
     products: typeof row.products === 'string' ? JSON.parse(row.products) : row.products,
     price: Number(row.price),
+    sd_total_cost: row.sd_total_cost != null ? Number(row.sd_total_cost) : null,
     signature_data: null,
   };
 }

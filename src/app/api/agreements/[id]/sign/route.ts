@@ -39,9 +39,35 @@ export async function POST(
       ...row,
       products: typeof row.products === 'string' ? JSON.parse(row.products) : row.products,
       price: Number(row.price),
+      sd_total_cost: row.sd_total_cost != null ? Number(row.sd_total_cost) : null,
     };
 
     const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    const isSoftwareDev = agreement.products.includes('Software Development');
+
+    const signedAgreement: Agreement = { ...agreement, signed_at: now, status: 'signed', signature_data };
+
+    if (isSoftwareDev) {
+      // Software Development: no payment collection — invoiced manually via QuickBooks
+      await pool.execute(
+        `UPDATE agreements SET signature_data = ?, signed_at = ?, status = 'signed' WHERE id = ?`,
+        [signature_data, now, id]
+      );
+
+      try {
+        const pdfBuffer = await renderToBuffer(
+          React.createElement(AgreementPDF, { agreement: signedAgreement }) as React.ReactElement<DocumentProps>
+        );
+        await Promise.all([
+          sendSignedClientEmail(signedAgreement, Buffer.from(pdfBuffer)),
+          sendSignedStaffEmail(signedAgreement),
+        ]);
+      } catch (emailErr) {
+        console.error('Failed to send signed emails:', emailErr);
+      }
+
+      return NextResponse.json({ paymentUrl: null, useIframe: false, skipPayment: true });
+    }
 
     if (!process.env.PAY_ADVANTAGE_USERNAME || !process.env.PAY_ADVANTAGE_PASSWORD) {
       return NextResponse.json(
@@ -69,8 +95,6 @@ export async function POST(
       [signature_data, now, customerId, id]
     );
 
-    // Send signed emails (PDF attached) — awaited so serverless doesn't terminate early
-    const signedAgreement: Agreement = { ...agreement, signed_at: now, status: 'signed' };
     try {
       const pdfBuffer = await renderToBuffer(
         React.createElement(AgreementPDF, { agreement: signedAgreement }) as React.ReactElement<DocumentProps>

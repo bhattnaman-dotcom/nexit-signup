@@ -16,6 +16,7 @@ const PRODUCTS = [
   'Advanced SEO',
   'Social Media Marketing (SMM)',
   'Paid Ads',
+  'Software Development',
 ] as const;
 
 export default function StaffFormPage() {
@@ -40,6 +41,7 @@ export default function StaffFormPage() {
   });
 
   const [otherChecked, setOtherChecked] = useState(false);
+  const [sdForm, setSdForm] = useState({ phase: '', scope: '', total_cost: '' });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [staffList, setStaffList] = useState<StaffOption[]>([]);
@@ -59,6 +61,8 @@ export default function StaffFormPage() {
     }));
   }
 
+  const isSoftwareDev = form.products.includes('Software Development');
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
@@ -70,6 +74,15 @@ export default function StaffFormPage() {
 
     if (products.length === 0) {
       setError('Please select at least one service.');
+      return;
+    }
+
+    if (isSoftwareDev && !sdForm.phase.trim()) {
+      setError('Please enter the project phase.');
+      return;
+    }
+    if (isSoftwareDev && !sdForm.scope.trim()) {
+      setError('Please describe the scope of work for this phase.');
       return;
     }
 
@@ -88,10 +101,13 @@ export default function StaffFormPage() {
           customer_phone: form.customer_phone,
           customer_abn: form.customer_abn.trim() || null,
           products,
-          breakdown_notes: form.breakdown_notes.trim() || null,
+          breakdown_notes: isSoftwareDev ? null : (form.breakdown_notes.trim() || null),
           price: parseFloat(form.price),
-          billing_type: form.billing_type,
-          billing_frequency: form.billing_type === 'recurring' ? form.billing_frequency : null,
+          billing_type: isSoftwareDev ? 'once-off' : form.billing_type,
+          billing_frequency: (!isSoftwareDev && form.billing_type === 'recurring') ? form.billing_frequency : null,
+          sd_phase: isSoftwareDev ? sdForm.phase.trim() : null,
+          sd_scope: isSoftwareDev ? sdForm.scope.trim() : null,
+          sd_total_cost: isSoftwareDev && sdForm.total_cost ? parseFloat(sdForm.total_cost) : null,
         }),
       });
 
@@ -332,25 +348,83 @@ export default function StaffFormPage() {
               </div>
             </div>
 
-            {/* Pricing Breakdown Notes */}
-            <div className="mb-6">
-              <label className={labelClass}>
-                Pricing Breakdown{' '}
-                <span className="text-gray-400 font-normal">(optional — shown on PDF)</span>
-              </label>
-              <textarea
-                value={form.breakdown_notes}
-                onChange={(e) => setForm((f) => ({ ...f, breakdown_notes: e.target.value }))}
-                className={`${inputClass} resize-none`}
-                rows={5}
-                placeholder={`e.g.\n$1,000/week short-term campaign\n$1,000 × 4 weeks = $4,000\n$4,000 × 30% NexIT fee = $1,200 incl. GST`}
-              />
-            </div>
+            {/* Software Development Fields */}
+            {isSoftwareDev && (
+              <div className="mb-6 border border-indigo-100 rounded-xl bg-indigo-50/40 p-5 space-y-4">
+                <p className="text-xs font-semibold text-indigo-700 uppercase tracking-wider">Software Development Details</p>
+                <div>
+                  <label className={labelClass}>Project Phase *</label>
+                  <input
+                    type="text"
+                    required={isSoftwareDev}
+                    value={sdForm.phase}
+                    onChange={(e) => setSdForm((f) => ({ ...f, phase: e.target.value }))}
+                    className={inputClass}
+                    placeholder="e.g. Phase 1 — Discovery & Planning"
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>Scope of Work — Current Phase *</label>
+                  <textarea
+                    required={isSoftwareDev}
+                    value={sdForm.scope}
+                    onChange={(e) => setSdForm((f) => ({ ...f, scope: e.target.value }))}
+                    className={`${inputClass} resize-none`}
+                    rows={5}
+                    placeholder="Describe the deliverables, features and tasks included in this phase…"
+                  />
+                </div>
+                <div className="sm:w-1/2">
+                  <label className={labelClass}>
+                    Estimated Total Project Cost{' '}
+                    <span className="text-gray-400 font-normal">(optional)</span>
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">$</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={sdForm.total_cost}
+                      onChange={(e) => setSdForm((f) => ({ ...f, total_cost: e.target.value }))}
+                      className={`${inputClass} pl-8`}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1">Full project value across all phases (for client reference only)</p>
+                </div>
+                <div className="flex items-start gap-2 bg-white rounded-lg border border-indigo-100 px-4 py-3 text-sm text-indigo-700">
+                  <svg className="w-4 h-4 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                  </svg>
+                  <span>Payment for Software Development is invoiced separately via QuickBooks. No payment will be collected through this platform.</span>
+                </div>
+              </div>
+            )}
+
+            {/* Pricing Breakdown Notes (non-SD only) */}
+            {!isSoftwareDev && (
+              <div className="mb-6">
+                <label className={labelClass}>
+                  Pricing Breakdown{' '}
+                  <span className="text-gray-400 font-normal">(optional — shown on PDF)</span>
+                </label>
+                <textarea
+                  value={form.breakdown_notes}
+                  onChange={(e) => setForm((f) => ({ ...f, breakdown_notes: e.target.value }))}
+                  className={`${inputClass} resize-none`}
+                  rows={5}
+                  placeholder={`e.g.\n$1,000/week short-term campaign\n$1,000 × 4 weeks = $4,000\n$4,000 × 30% NexIT fee = $1,200 incl. GST`}
+                />
+              </div>
+            )}
 
             {/* Price & Billing */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
-                <label className={labelClass}>Price (AUD, incl. GST) *</label>
+                <label className={labelClass}>
+                  {isSoftwareDev ? 'Estimated Phase Cost (AUD, incl. GST) *' : 'Price (AUD, incl. GST) *'}
+                </label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">
                     $
@@ -366,35 +440,40 @@ export default function StaffFormPage() {
                     placeholder="0.00"
                   />
                 </div>
+                {isSoftwareDev && (
+                  <p className="text-xs text-gray-400 mt-1">Cost for the current phase only</p>
+                )}
               </div>
 
-              <div>
-                <label className={labelClass}>Billing Type *</label>
-                <div className="flex gap-3 mt-2">
-                  {(['once-off', 'recurring'] as const).map((bt) => (
-                    <label
-                      key={bt}
-                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 cursor-pointer transition-all text-sm font-medium ${
-                        form.billing_type === bt
-                          ? 'border-nexit-orange bg-orange-50 text-nexit-orange'
-                          : 'border-gray-200 text-gray-600 hover:border-gray-300'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="billing_type"
-                        value={bt}
-                        checked={form.billing_type === bt}
-                        onChange={() => setForm((f) => ({ ...f, billing_type: bt }))}
-                        className="hidden"
-                      />
-                      {bt === 'once-off' ? 'Once-off' : 'Recurring'}
-                    </label>
-                  ))}
+              {!isSoftwareDev && (
+                <div>
+                  <label className={labelClass}>Billing Type *</label>
+                  <div className="flex gap-3 mt-2">
+                    {(['once-off', 'recurring'] as const).map((bt) => (
+                      <label
+                        key={bt}
+                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 cursor-pointer transition-all text-sm font-medium ${
+                          form.billing_type === bt
+                            ? 'border-nexit-orange bg-orange-50 text-nexit-orange'
+                            : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="billing_type"
+                          value={bt}
+                          checked={form.billing_type === bt}
+                          onChange={() => setForm((f) => ({ ...f, billing_type: bt }))}
+                          className="hidden"
+                        />
+                        {bt === 'once-off' ? 'Once-off' : 'Recurring'}
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {form.billing_type === 'recurring' && (
+              {!isSoftwareDev && form.billing_type === 'recurring' && (
                 <div>
                   <label className={labelClass}>Billing Frequency *</label>
                   <select

@@ -209,6 +209,7 @@ function formatDate(iso: string | null): string {
 }
 
 function billingLabel(agreement: Agreement): string {
+  if (agreement.products.includes('Software Development')) return 'Project-Based — Invoiced via QuickBooks';
   if (agreement.billing_type === 'once-off') return 'Once-off Payment';
   const freq = agreement.billing_frequency ?? 'monthly';
   return `Recurring — ${freq.charAt(0).toUpperCase() + freq.slice(1)}`;
@@ -327,6 +328,40 @@ export function AgreementPDF({ agreement }: AgreementPDFProps) {
               </Text>
             </View>
           </View>
+
+          {/* Software Development Details */}
+          {agreement.products.includes('Software Development') && (agreement.sd_phase || agreement.sd_scope) && (
+            <>
+              <Text style={styles.sectionTitle}>Software Development Details</Text>
+              <View style={styles.card}>
+                {agreement.sd_phase ? (
+                  <View style={styles.row}>
+                    <Text style={styles.label}>Project Phase:</Text>
+                    <Text style={styles.value}>{agreement.sd_phase}</Text>
+                  </View>
+                ) : null}
+                {agreement.sd_total_cost ? (
+                  <View style={styles.row}>
+                    <Text style={styles.label}>Total Project Cost:</Text>
+                    <Text style={styles.value}>{formatPrice(agreement.sd_total_cost)} AUD (incl. GST) — estimated</Text>
+                  </View>
+                ) : null}
+                {agreement.sd_scope ? (
+                  <View style={{ marginTop: 6 }}>
+                    <Text style={[styles.label, { marginBottom: 4 }]}>Scope of Work — Current Phase:</Text>
+                    <View style={styles.breakdownBox}>
+                      <Text style={[styles.breakdownLine, { lineHeight: 1.7 }]}>{agreement.sd_scope}</Text>
+                    </View>
+                  </View>
+                ) : null}
+                <View style={[styles.row, { marginTop: 8, backgroundColor: '#eef2ff', borderRadius: 4, padding: 8 }]}>
+                  <Text style={[styles.value, { fontSize: 8, color: '#4338ca', fontFamily: 'Helvetica-Bold' }]}>
+                    Payment for this phase will be invoiced separately via QuickBooks. No payment is collected through this platform.
+                  </Text>
+                </View>
+              </View>
+            </>
+          )}
 
           {/* Signature */}
           {agreement.signature_data && (

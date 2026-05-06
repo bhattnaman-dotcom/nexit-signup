@@ -68,7 +68,9 @@ export default function AgreementView({ agreement }: { agreement: Agreement }) {
       }
 
       const data = await res.json();
-      if (data.useIframe) {
+      if (data.skipPayment) {
+        router.push(`/agreement/${agreement.id}/signed`);
+      } else if (data.useIframe) {
         setIframeUrl(data.paymentUrl);
         setStage('payment');
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -147,26 +149,57 @@ export default function AgreementView({ agreement }: { agreement: Agreement }) {
           </div>
         </div>
 
+        {/* Software Development Details */}
+        {agreement.products.includes('Software Development') && (agreement.sd_phase || agreement.sd_scope) && (
+          <div className="mb-5 border border-indigo-100 rounded-xl bg-indigo-50/40 p-4 space-y-3">
+            <p className="text-xs font-semibold text-indigo-700 uppercase tracking-wider">Software Development</p>
+            {agreement.sd_phase && (
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">Project Phase</p>
+                <p className="text-sm font-medium text-nexit-dark">{agreement.sd_phase}</p>
+              </div>
+            )}
+            {agreement.sd_scope && (
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">Scope of Work — Current Phase</p>
+                <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{agreement.sd_scope}</p>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Price & billing */}
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
           <div>
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
-              Investment
+              {agreement.products.includes('Software Development') ? 'Estimated Phase Cost' : 'Investment'}
             </p>
             <p className="text-2xl font-bold font-sora text-nexit-dark">
               {formatPrice(agreement.price)}
             </p>
             <p className="text-xs text-gray-400 mt-0.5">AUD incl. GST</p>
+            {agreement.sd_total_cost && (
+              <p className="text-xs text-gray-400 mt-0.5">
+                Total project: {formatPrice(agreement.sd_total_cost)}
+              </p>
+            )}
           </div>
-          <span
-            className={`px-4 py-2 rounded-full text-sm font-bold ${
-              agreement.billing_type === 'recurring'
-                ? 'bg-nexit-navy text-white'
-                : 'bg-nexit-orange text-white'
-            }`}
-          >
-            {agreement.billing_type === 'recurring' ? '↻ Recurring' : '⚡ Once-off'}
-          </span>
+          {!agreement.products.includes('Software Development') && (
+            <span
+              className={`px-4 py-2 rounded-full text-sm font-bold ${
+                agreement.billing_type === 'recurring'
+                  ? 'bg-nexit-navy text-white'
+                  : 'bg-nexit-orange text-white'
+              }`}
+            >
+              {agreement.billing_type === 'recurring' ? '↻ Recurring' : '⚡ Once-off'}
+            </span>
+          )}
+          {agreement.products.includes('Software Development') && (
+            <span className="px-4 py-2 rounded-full text-sm font-bold bg-indigo-100 text-indigo-700">
+              Project-Based
+            </span>
+          )}
         </div>
       </div>
 
