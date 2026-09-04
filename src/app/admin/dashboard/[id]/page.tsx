@@ -18,6 +18,7 @@ async function getAgreement(id: string): Promise<Agreement | null> {
     ...row,
     products: typeof row.products === 'string' ? JSON.parse(row.products) : row.products,
     price: Number(row.price),
+    sd_total_cost: row.sd_total_cost != null ? Number(row.sd_total_cost) : null,
   };
 }
 
@@ -139,10 +140,50 @@ export default async function AdminAgreementDetailPage({
                 ))}
               </div>
             </div>
-            <Field label="Price" value={`${formatPrice(agreement.price)} AUD (incl. GST)`} />
+            {agreement.breakdown_notes && (
+              <div className="mb-3">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                  Pricing Breakdown
+                </p>
+                <div className="border border-gray-200 rounded-lg bg-gray-50 px-3 py-2">
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+                    {agreement.breakdown_notes}
+                  </p>
+                </div>
+              </div>
+            )}
+            {agreement.sd_phase && <Field label="Project Phase" value={agreement.sd_phase} />}
+            {agreement.sd_scope && (
+              <div className="mb-3">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                  Scope of Work — Current Phase
+                </p>
+                <div className="border border-gray-200 rounded-lg bg-gray-50 px-3 py-2">
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+                    {agreement.sd_scope}
+                  </p>
+                </div>
+              </div>
+            )}
+            <Field
+              label={agreement.sd_phase ? 'Phase Cost' : 'Price'}
+              value={`${formatPrice(agreement.price)} AUD (incl. GST)`}
+            />
+            {agreement.sd_total_cost ? (
+              <Field
+                label="Total Project Cost"
+                value={`${formatPrice(agreement.sd_total_cost)} AUD (incl. GST) — estimated`}
+              />
+            ) : null}
             <Field
               label="Billing"
-              value={agreement.billing_type === 'recurring' ? 'Recurring Monthly' : 'Once-off'}
+              value={
+                agreement.products.includes('Software Development')
+                  ? 'Project-Based — Invoiced via QuickBooks'
+                  : agreement.billing_type === 'recurring'
+                    ? `Recurring — ${(agreement.billing_frequency ?? 'monthly').charAt(0).toUpperCase() + (agreement.billing_frequency ?? 'monthly').slice(1)}`
+                    : 'Once-off'
+              }
             />
           </Card>
 
