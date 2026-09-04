@@ -12,6 +12,15 @@ function formatPrice(price: number): string {
 
 type Stage = 'sign' | 'payment' | 'complete';
 
+const EXPIRY_DAYS = 28;
+
+function isAgreementExpired(agreement: Agreement): boolean {
+  if (agreement.status !== 'pending') return false;
+  const created = new Date(agreement.created_at);
+  const expiry = new Date(created.getTime() + EXPIRY_DAYS * 24 * 60 * 60 * 1000);
+  return new Date() > expiry;
+}
+
 export default function AgreementView({ agreement }: { agreement: Agreement }) {
   const router = useRouter();
   const [stage, setStage] = useState<Stage>(() => {
@@ -90,6 +99,29 @@ export default function AgreementView({ agreement }: { agreement: Agreement }) {
     month: 'long',
     year: 'numeric',
   });
+
+  if (isAgreementExpired(agreement)) {
+    return (
+      <div className="max-w-3xl mx-auto px-6 py-20 text-center">
+        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-amber-100 mb-4">
+          <svg className="w-10 h-10 text-amber-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h2 className="text-2xl font-bold font-sora text-nexit-dark mb-2">
+          This agreement link has expired.
+        </h2>
+        <p className="text-gray-500 text-sm max-w-sm mx-auto">
+          Agreement links are valid for {EXPIRY_DAYS} days. Please contact your NexIT representative to have a new agreement sent to you.
+        </p>
+        <p className="text-sm text-gray-400 mt-4">
+          <a href="mailto:hello@nexit.com.au" className="text-nexit-orange hover:underline">
+            hello@nexit.com.au
+          </a>
+        </p>
+      </div>
+    );
+  }
 
   if (agreement.status === 'signed' && stage === 'sign') {
     return (

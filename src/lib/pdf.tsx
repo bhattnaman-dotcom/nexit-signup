@@ -22,6 +22,9 @@ const dark = '#1A1D36';
 const lightGrey = '#f5f5f5';
 const midGrey = '#666666';
 const NEXIT_ABN = '92 401 198 599';
+const LOGO_URL = process.env.NEXT_PUBLIC_BASE_URL
+  ? `${process.env.NEXT_PUBLIC_BASE_URL}/nexit-logo.svg`
+  : null;
 
 const styles = StyleSheet.create({
   page: {
@@ -236,7 +239,11 @@ export function AgreementPDF({ agreement }: AgreementPDFProps) {
         {/* Header */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.headerTitle}>NexIT Solutions</Text>
+            {LOGO_URL ? (
+              <Image src={LOGO_URL} style={{ width: 120, height: 39, marginBottom: 4 }} />
+            ) : (
+              <Text style={styles.headerTitle}>NexIT Solutions</Text>
+            )}
             <Text style={styles.headerSub}>ABN {NEXIT_ABN} · Melbourne's Digital Growth Partner</Text>
           </View>
           <Text style={styles.headerBadge}>SERVICE AGREEMENT</Text>
@@ -403,7 +410,11 @@ export function AgreementPDF({ agreement }: AgreementPDFProps) {
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
           <View>
-            <Text style={styles.headerTitle}>NexIT Solutions</Text>
+            {LOGO_URL ? (
+              <Image src={LOGO_URL} style={{ width: 120, height: 39, marginBottom: 4 }} />
+            ) : (
+              <Text style={styles.headerTitle}>NexIT Solutions</Text>
+            )}
             <Text style={styles.headerSub}>ABN {NEXIT_ABN} · Melbourne's Digital Growth Partner</Text>
           </View>
           <Text style={styles.headerBadge}>TERMS &amp; CONDITIONS</Text>

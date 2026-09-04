@@ -35,6 +35,12 @@ export async function POST(
       return NextResponse.json({ error: 'Agreement already signed' }, { status: 409 });
     }
 
+    const createdAt = new Date(row.created_at);
+    const expiry = new Date(createdAt.getTime() + 28 * 24 * 60 * 60 * 1000);
+    if (new Date() > expiry) {
+      return NextResponse.json({ error: 'This agreement link has expired. Please contact NexIT for a new agreement.' }, { status: 410 });
+    }
+
     const agreement: Agreement = {
       ...row,
       products: typeof row.products === 'string' ? JSON.parse(row.products) : row.products,
