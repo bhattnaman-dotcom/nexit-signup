@@ -38,7 +38,7 @@ export default async function AgreementPage({
       {/* Sticky header */}
       <header className="bg-nexit-dark sticky top-0 z-20 shadow-lg">
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
-          <NexitLogo textClassName="text-white text-xl" />
+          <NexitLogo variant="light" />
           <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest bg-nexit-navy/60 px-3 py-1 rounded-full">
             Client Agreement
           </span>

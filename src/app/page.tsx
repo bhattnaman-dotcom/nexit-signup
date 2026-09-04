@@ -134,7 +134,7 @@ export default function StaffFormPage() {
       {/* Header */}
       <header className="bg-nexit-dark border-b border-gray-800 sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
-          <NexitLogo textClassName="text-white text-xl" />
+          <NexitLogo variant="light" />
           <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">
             Staff Portal
           </span>

@@ -2,24 +2,27 @@ import Image from 'next/image';
 
 interface NexitLogoProps {
   className?: string;
-  textClassName?: string;
+  /** Use the white-wordmark variant — for dark backgrounds such as the app header. */
+  variant?: 'dark' | 'light';
+  /** Rendered height in px. Width scales automatically (logo aspect ratio ≈ 3.12:1). */
   height?: number;
 }
 
-export default function NexitLogo({ className = '', textClassName = '', height = 36 }: NexitLogoProps) {
+const ASPECT = 720 / 231;
+
+export default function NexitLogo({
+  className = '',
+  variant = 'dark',
+  height = 34,
+}: NexitLogoProps) {
   return (
-    <div className={`flex items-center gap-2.5 ${className}`}>
-      <Image
-        src="/nexit-logo-icon.svg"
-        alt=""
-        height={height}
-        width={height}
-        priority
-      />
-      <span className={`font-sora font-bold tracking-wide ${textClassName}`}>
-        <span className="text-nexit-orange">Nex</span>
-        <span>IT</span>
-      </span>
-    </div>
+    <Image
+      src={variant === 'light' ? '/nexit-logo-light.png' : '/nexit-logo.png'}
+      alt="NexIT Solutions"
+      height={height}
+      width={Math.round(height * ASPECT)}
+      className={className}
+      priority
+    />
   );
 }

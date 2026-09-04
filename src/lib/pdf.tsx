@@ -22,9 +22,22 @@ const dark = '#1A1D36';
 const lightGrey = '#f5f5f5';
 const midGrey = '#666666';
 const NEXIT_ABN = '92 401 198 599';
-const LOGO_URL = process.env.NEXT_PUBLIC_BASE_URL
-  ? `${process.env.NEXT_PUBLIC_BASE_URL}/nexit-logo.svg`
-  : null;
+
+// Logo is embedded as a base64 data URI so PDF rendering never depends on a
+// network fetch (serverless functions can't always reach their own domain).
+// The light variant has a white wordmark, for the navy header band.
+const LOGO_DATA_URI: string | null = (() => {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const fs = require('fs') as typeof import('fs');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const path = require('path') as typeof import('path');
+    const file = path.join(process.cwd(), 'public', 'nexit-logo-light.png');
+    return `data:image/png;base64,${fs.readFileSync(file).toString('base64')}`;
+  } catch {
+    return null;
+  }
+})();
 
 const styles = StyleSheet.create({
   page: {
@@ -239,8 +252,8 @@ export function AgreementPDF({ agreement }: AgreementPDFProps) {
         {/* Header */}
         <View style={styles.header}>
           <View>
-            {LOGO_URL ? (
-              <Image src={LOGO_URL} style={{ width: 120, height: 39, marginBottom: 4 }} />
+            {LOGO_DATA_URI ? (
+              <Image src={LOGO_DATA_URI} style={{ width: 125, height: 40, marginBottom: 5 }} />
             ) : (
               <Text style={styles.headerTitle}>NexIT Solutions</Text>
             )}
@@ -410,8 +423,8 @@ export function AgreementPDF({ agreement }: AgreementPDFProps) {
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
           <View>
-            {LOGO_URL ? (
-              <Image src={LOGO_URL} style={{ width: 120, height: 39, marginBottom: 4 }} />
+            {LOGO_DATA_URI ? (
+              <Image src={LOGO_DATA_URI} style={{ width: 125, height: 40, marginBottom: 5 }} />
             ) : (
               <Text style={styles.headerTitle}>NexIT Solutions</Text>
             )}

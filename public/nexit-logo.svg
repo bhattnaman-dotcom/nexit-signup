@@ -1,9 +1,0 @@
-<svg width="160" height="52" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Stacked squares (back to front, offset upper-right to lower-left) -->
-  <rect x="18" y="0"  width="34" height="34" rx="7" fill="#FAC86E"/>
-  <rect x="9"  y="9"  width="34" height="34" rx="7" fill="#F79332"/>
-  <rect x="0"  y="18" width="34" height="34" rx="7" fill="#F47B20"/>
-  <!-- Wordmark -->
-  <text x="50" y="38" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="28" letter-spacing="0.5" fill="#F47B20">Nex</text>
-  <text x="100" y="38" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="28" letter-spacing="0.5" fill="#2C3275">IT</text>
-</svg>

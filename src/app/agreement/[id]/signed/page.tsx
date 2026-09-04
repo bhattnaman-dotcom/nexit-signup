@@ -31,7 +31,7 @@ export default async function SignedPage({
       {/* Header */}
       <header className="bg-nexit-dark">
         <div className="max-w-2xl mx-auto px-6 py-5">
-          <NexitLogo textClassName="text-white text-xl" />
+          <NexitLogo variant="light" />
         </div>
       </header>
 
@@ -100,7 +100,7 @@ export default async function SignedPage({
 
         {/* Contact */}
         <div className="bg-nexit-dark rounded-2xl p-6">
-          <NexitLogo className="justify-center mb-3" textClassName="text-white text-lg" />
+          <NexitLogo variant="light" height={30} className="mx-auto mb-3" />
           <p className="text-gray-400 text-sm mb-4">Questions? Our team is here to help.</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center text-sm">
             <a

@@ -40,7 +40,7 @@ export default async function StaffPage() {
       <header className="bg-nexit-dark border-b border-gray-800 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <NexitLogo textClassName="text-white text-xl" />
+            <NexitLogo variant="light" />
             <span className="text-gray-500 text-sm hidden sm:block">Staff Management</span>
           </div>
           <Link

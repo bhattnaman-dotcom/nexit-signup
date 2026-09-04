@@ -39,7 +39,7 @@ export default async function AgreementCreatedPage({
       {/* Header */}
       <header className="bg-nexit-dark border-b border-gray-800">
         <div className="max-w-2xl mx-auto px-6 py-4">
-          <NexitLogo textClassName="text-white text-xl" />
+          <NexitLogo variant="light" />
         </div>
       </header>
 

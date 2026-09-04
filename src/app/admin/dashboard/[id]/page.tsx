@@ -51,7 +51,7 @@ export default async function AdminAgreementDetailPage({
       {/* Header */}
       <header className="bg-nexit-dark border-b border-gray-800">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
-          <NexitLogo textClassName="text-white text-xl" />
+          <NexitLogo variant="light" />
           <span className="text-gray-500 text-sm">Admin Dashboard</span>
         </div>
       </header>

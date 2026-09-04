@@ -166,7 +166,7 @@ export default async function AdminDashboardPage({
       <header className="bg-nexit-dark border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <NexitLogo textClassName="text-white text-xl" />
+            <NexitLogo variant="light" />
             <span className="text-gray-500 text-sm hidden sm:block">Admin Dashboard</span>
           </div>
           <div className="flex items-center gap-3">

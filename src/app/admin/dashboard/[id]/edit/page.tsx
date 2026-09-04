@@ -31,7 +31,7 @@ export default async function EditAgreementPage({
     <div className="min-h-screen bg-gray-50">
       <header className="bg-nexit-dark border-b border-gray-800 sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-center gap-4">
-          <NexitLogo textClassName="text-white text-xl" />
+          <NexitLogo variant="light" />
           <span className="text-gray-500 text-sm">Admin Dashboard</span>
         </div>
       </header>

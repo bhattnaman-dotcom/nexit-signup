@@ -39,7 +39,7 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <NexitLogo className="justify-center mb-3" textClassName="text-white text-2xl" />
+          <NexitLogo variant="light" height={40} className="mx-auto mb-3" />
           <p className="text-gray-400 text-sm">Admin Dashboard</p>
         </div>
 
